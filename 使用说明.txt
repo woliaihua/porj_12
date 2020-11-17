@@ -1,0 +1,12 @@
+首先解压dist文件。
+
+
+运行：
+1，安装谷歌浏览85版本，可百度下载
+2，打开谷歌浏览器 输入地址chrome://version/
+3，复制可执行文件路径 比如C:\Users\liaihua\AppData\Local\Google\Chrome\Application\chrome.exe
+4，打开config.ini 把刚刚复制的路径配置到chrome_path后面
+6,打开芝麻软件并登录成功，链接上一起奇幻ip，保存窗口在桌面上就行
+6，双击运行setup.exe
+
+注意：excel是被去重后开始运行，并且EXECL.xlsx 不要重命名

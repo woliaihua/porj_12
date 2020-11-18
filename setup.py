@@ -122,6 +122,8 @@ class BaseStartChome():
             except:
                 pass
 
+    def zhuce(self):
+        self.driver.get('https://applications.labor.ny.gov/IndividualReg/xhtml/individual/emailVerification.faces')
 
 
     def chick_liucheng_bakeup(self):

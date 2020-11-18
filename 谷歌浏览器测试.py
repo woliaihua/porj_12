@@ -65,14 +65,14 @@ Object.defineProperty(navigator, 'webdriver', {
 '''
 set_driver(driver)
 driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {"source": script})
-# driver.get('https://sellercentral.amazon.co.uk/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fsellercentral.amazon.co.uk%2Fhome&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=sc_uk_amazon_v2&openid.mode=checkid_setup&language=zh_CN&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&pageId=sc_uk_amazon_v2&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&ssoResponse=eyJ6aXAiOiJERUYiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiQTI1NktXIn0.a5mUI1lQr80X3ikb1RfOscCl9fzyVVqmwXRr7HiL8LvGu6_LPzJA3w.T45gQk4uPvjQ7NW0.Na-asGEBLFxeUQFlqMQgwJNXHMC74exdYEpDoxF-LZ9sURBQONC_tTvjCK5Rsr781XOY-SMbZMSmm3q4UhtKJKJVN3tYK-vsOlfm01WkIwsztXXVAtPK50U3GNL1TdWt83BC2gUPzCVvkSVunLWRqUtS3yqesp5rCOyBl4SKfhHTQs2581J8-15xVwQ7LiN1vVYU_tMMJWMimFq2SITB6lvXS9cm8Hs8Rv81scAwDMJUtyHMddsgLnOSZ3wRbY_YmVcS.IwaDHOGL2wtpgIvB_we95A')
+# driver.get('http://www.labor.ny.gov/signin')
 # write('854639',into=S('//*[@name="verifyOTPButton"]'))
 # write('+86 18040377309',into=S('//*[@id="country-phone-input"]'))
 # click(S('//*[@id="go"]'))
 print(driver.title)
-click(S('//*[@id="ExistingAddress"]/div[1]/div/div/div/div/label/input'))
+# click(S('//*[@id="create-account-button"]'))#点击注册
 #wait_until(Text('我们找不到具有该电子邮件地址的账户').exists, timeout_secs=1, interval_secs=0.4)  # 需要安全验证
-#write('kejv0059',into=S('//*[@id="ap_password"]'))
+write('123',into=S('//*[@id="userNameFirst"]'))
 #wait_until(S('//*[@id="auth-captcha-refresh-link" and @style="display: inline;"]').exists, timeout_secs=10, interval_secs=0.4)  ## 是否没货
 print(datetime.datetime.now())
 #if not CheckBox("is a beneficial owner of the business").is_checked():  # 复选框没有被选中

@@ -26,8 +26,10 @@ from yanzhengqi_oper import get_make_code
 from base64_to_img import to_png
 from chick_proxy import servers_chick_ip
 from del_txt_line import del_line#用一行删除一行
-from url_2_png import get_src_img
+from selenium.webdriver import ActionChains #动作操作
 import datetime
+from xpath_to_png import GetPng
+from chaojiying_Python.chaojiying import get_coordinate
 """
 滑动图片验证
 """
@@ -65,14 +67,32 @@ Object.defineProperty(navigator, 'webdriver', {
 '''
 set_driver(driver)
 driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {"source": script})
-# driver.get('http://www.labor.ny.gov/signin')
+# driver.get('https://applications.labor.ny.gov/IndividualReg/xhtml/individual/emailVerification.faces')
 # write('854639',into=S('//*[@name="verifyOTPButton"]'))
 # write('+86 18040377309',into=S('//*[@id="country-phone-input"]'))
 # click(S('//*[@id="go"]'))
 print(driver.title)
 # click(S('//*[@id="create-account-button"]'))#点击注册
 #wait_until(Text('我们找不到具有该电子邮件地址的账户').exists, timeout_secs=1, interval_secs=0.4)  # 需要安全验证
-write('123',into=S('//*[@id="userNameFirst"]'))
+# write('123',into=S('//*[@id="userNameFirst"]'))#firse name
+# write('123', into=S('//*[@id="userNameLast"]'))  # firse name#firse name
+# write('123', into=S('//*[@id="userEmail"]'))  # E-mail Address
+# write('123', into=S('//*[@id="userEmailConfirm"]'))  # Confirm E-mail Address
+click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe')) #点击弹出验证码
+sleep(2)
+img_element = S('//*[@id="rc-imageselect"]').web_element
+GetPng(driver).get_geetest_image() #获取验证码图片
+
+l =get_coordinate()#获取识别的坐标 [['90', '331'], ['244', '346'], ['213', '436'], ['308', '451']] #g
+print(l)
+for position in  l:
+    print(position)
+    #动作链对象
+    action =  ActionChains(driver)
+    #action.move_to_element_with_offset(img_element,int(position[0])+286,int(position[1])).click().perform()#鼠标移动到元素点击坐标
+    action.move_to_element_with_offset(img_element,int(position[0]),int(position[1])).click().perform()#鼠标移动到元素点击坐标
+    sleep(0.3)
+click(Button('Verify'))
 #wait_until(S('//*[@id="auth-captcha-refresh-link" and @style="display: inline;"]').exists, timeout_secs=10, interval_secs=0.4)  ## 是否没货
 print(datetime.datetime.now())
 #if not CheckBox("is a beneficial owner of the business").is_checked():  # 复选框没有被选中
@@ -87,19 +107,7 @@ print(datetime.datetime.now())
 
 #click(S('//*[@id="cancelOTPLink"]/span'))  # 点击提交，但是提交后可能没货
 # txt = S('//*[@id="container"]//img').web_element.get_attribute('src')
-wait_until(S('//input[@name="pincode"]').exists, timeout_secs=20, interval_secs=0.4)  ## 是否有邮编输入框
-write(temp_dict.get('邮编'),into=S('//input[@name="pincode"]'))
-write(temp_dict.get('街道地址'),into=S('//input[@name="address_line1"]'))
-write(temp_dict.get('城市'), into=S('//input[@name="city"]'))
-write(temp_dict.get('省'), into=S('//input[@name="state"]'))
-#获取电话号码
-SR = SendRequest()
-phone = SR.get_phone()
-print('获取到的手机号是{}'.format(phone))
-write('+86 {}'.format(phone), into=S('//*[@name="phoneno"]'))
-write(temp_dict.get('英文名'),into=S('//input[@name="firstName"]'))
-write(temp_dict.get('英文姓'),into=S('//input[@name="lastName"]'))
-write(temp_dict.get('统一社会信用代码'), into=S('//input[@name="businessLicenseNumber"]'))
+
 # click(S('//*[@name="Submit"]'))  # 点击保存并继续
 
 #liucheng4()

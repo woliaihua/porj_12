@@ -50,8 +50,18 @@ class Chaojiying_Client(object):
         r = requests.post('http://upload.chaojiying.net/Upload/ReportError.php', data=params, headers=self.headers)
         return r.json()
 
-
-if __name__ == '__main__':
+def get_coordinate():
+    """
+    获取图片坐标
+    :return:
+    """
     chaojiying = Chaojiying_Client('beilou202', 'beilou202', '909888')  # 用户中心>>软件ID 生成一个替换 96001
-    im = open('111.png', 'rb').read()  # 本地图片文件路径 来替换 a.jpg 有时WIN系统须要//
-    print(chaojiying.PostPic(im, 9004))  # 1902 验证码类型  官方网站>>价格体系 3.4+版 print 后要加()
+    im = open('./chaojiying_Python/captcha.png', 'rb').read()  # 本地图片文件路径 来替换 a.jpg 有时WIN系统须要//
+    result = chaojiying.PostPic(im, 9004)  # 1902 验证码类型  官方网站>>价格体系 3.4+版 print 后要加()
+    coordinate = result.get('pic_str')#坐标 92,344|193,447|xx,xx
+    if coordinate:
+        return [i.split(',') for i in coordinate.split('|')] #[['92', '344'], ['193', '447'], ['xx', 'xx']]
+    else:
+        return False
+if __name__ == '__main__':
+    get_coordinate()

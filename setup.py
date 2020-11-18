@@ -124,8 +124,11 @@ class BaseStartChome():
 
     def zhuce(self):
         self.driver.get('https://applications.labor.ny.gov/IndividualReg/xhtml/individual/emailVerification.faces')
-
-
+        write('123', into=S('//*[@id="userNameFirst"]'))  # firse name
+        write('123', into=S('//*[@id="userNameLast"]'))  # last name
+        write('123', into=S('//*[@id="userEmail"]'))  # E-mail Address
+        write('123', into=S('//*[@id="userEmailConfirm"]'))  # Confirm E-mail Address
+        click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe')) #点击弹出验证码
     def chick_liucheng_bakeup(self):
         """
         流程准备工作检测，登录成功后可能提示We're sorry!

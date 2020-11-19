@@ -7,7 +7,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from locale import atof,setlocale,LC_NUMERIC
 from email_oper import *
-from get_template import get_temp_dict,get_filename
+from get_template import *
 from send_request import SendRequest
 from selenium.webdriver.support.ui import Select
 from yanzhengqi_oper import get_make_code
@@ -16,6 +16,13 @@ from chick_proxy import servers_chick_ip
 from del_txt_line import del_line#用一行删除一行
 from url_2_png import get_src_img
 from email_oper import get_url
+from xpath_to_png import GetPng
+from chaojiying_Python.chaojiying import get_coordinate
+from selenium.webdriver import ActionChains #动作操作
+from picture_recognition import PictureRecognition
+from random_str import get_ranrom_str
+
+
 
 setlocale(LC_NUMERIC, 'English_US')
 
@@ -67,8 +74,12 @@ class BaseStartChome():
     """
 
     def __init__(self,port,ip):
-        self.temp_filename = get_filename('.txt', 'template')
-        self.temp_dict = get_temp_dict(self.temp_filename)  # 模板
+        self.personal_information_filename = get_filename('.txt', '个人信息')
+        self.personal_information_dict = get_temp_dict(self.personal_information_filename)  # 个人信息
+        self.phone_filename = get_filename('.txt', '个人电话')
+        self.phone_dict = get_phone_dict(self.phone_filename)  # 个人电话
+        self.email_filename = get_filename('.txt', '个人邮箱')
+        self.email_dict = get_email_dict(self.email_filename)  # 邮箱
         self.ip = ip
         #kill_pid(port)
         kill_all_chorme()
@@ -90,20 +101,6 @@ class BaseStartChome():
         set_driver(self.driver)
         self.driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {"source": script})
         Config.implicit_wait_secs =10 #设置隐式等待时间15秒
-        self.ip_state = self.chick_ip() #标记要修改
-
-    def chick_ip(self):
-        """
-        检测ip是否有效
-        :return:
-        """
-        self.driver.get("https://www.baidu.com/")
-        title = self.driver.title
-        del_line(self.ip, 'ip.txt')  # 访问百度之后删除ip
-        if title == 'www.baidu.com':
-            return False
-        else:
-            return True
 
     def login_out(self):
         self.driver.delete_all_cookies()
@@ -121,24 +118,79 @@ class BaseStartChome():
                 pass
             except:
                 pass
-
-    def zhuce(self):
-        self.driver.get('https://applications.labor.ny.gov/IndividualReg/xhtml/individual/emailVerification.faces')
-        write('123', into=S('//*[@id="userNameFirst"]'))  # firse name
-        write('123', into=S('//*[@id="userNameLast"]'))  # last name
-        write('123', into=S('//*[@id="userEmail"]'))  # E-mail Address
-        write('123', into=S('//*[@id="userEmailConfirm"]'))  # Confirm E-mail Address
-        click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe')) #点击弹出验证码
-    def chick_liucheng_bakeup(self):
+    def chick_yanzhengma(self):
         """
-        流程准备工作检测，登录成功后可能提示We're sorry!
+        检查验证码是否正常通过
         :return:
         """
-        try:
-            wait_until(Text("We're sorry!").exists, timeout_secs=6, interval_secs=0.4)
-            return False
-        except:
-            return True
+        for i in range(100):
+            if i == 0:
+                sleep(2.5)
+            sleep(1)
+            img_exist = self.check_img_exist('./img/ok.png')
+            if img_exist:#ok图片存在表示成功
+                print('验证码通过')
+                return
+            else:
+                print('循环检测验证码是否验证成功种...')
+            if i == 99:
+                print('超时，程序退出')
+                sys.exit()
+
+    def liucheng1(self):
+        """
+        第一二张：注册
+        :return:
+        """
+        self.driver.get('https://applications.labor.ny.gov/IndividualReg/xhtml/individual/emailVerification.faces')
+        write(self.personal_information_dict.get('First 名字'), into=S('//*[@id="userNameFirst"]'))  # firse name
+        write(self.personal_information_dict.get('last 姓'), into=S('//*[@id="userNameLast"]'))  # last name
+        write(self.email_dict.get('邮箱地址'), into=S('//*[@id="userEmail"]'))  # E-mail Address
+        write(self.email_dict.get('邮箱地址'), into=S('//*[@id="userEmailConfirm"]'))  # Confirm E-mail Address
+        click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe')) #点击弹出验证码
+        print('请输出验证码')
+        self.chick_yanzhengma()#开始检查验证码是否通过
+        # click(Link('Contact Us'))  # 打开一个新的标签页面
+        # switch_to(find_all(Window())[0])  # 切换到第0个窗口
+        click(S('//*[@id="buttondoAddReg"]'))  # 点击continue
+
+    def liucheng2(self):
+        """
+        第三四张：激活邮箱
+        :return:
+        """
+        #switch_to(find_all(Window())[1])  # 打开第0个窗口
+        self.driver.get("https://login.yahoo.com/")
+        write('VioletAugustinelAa84460@yahoo.com', into=S('//*[@id="login-username"]'))  # 输入邮箱地址
+        click(S('//*[@id="login-signin"]'))  # 点击下一步
+        write('ziIgJAbUKCr', into=S('//*[@id="login-passwd"]'))  # E-mail Address
+        click(S('//*[@id="login-signin"]'))  # 点击下一步
+        click(S('//*[@id="ybarMailLink"]/span[1]'))  # 点击收件箱
+        for i in range(60):
+            try:
+                click(Text('Individual Account Creation for Online Services'))  # 点击第一封邮件
+                break
+            except:
+                print('暂时没有收到邮件，1秒后面重新检测...')
+            if i == 59:
+                print('1分钟还未收到邮件，程序退出')
+                sys.exit()
+        click(Link('Click here to continue with the registration process.'))  # 点击第一封邮件
+
+    def liucheng3(self):
+        """
+        第五张图，激活邮件种输入详细信息
+        :return:
+        """
+        self.username = get_ranrom_str(12)
+        print("生成随机用户名:", self.username)
+        self.pwd = get_ranrom_str(16)
+        print("生成随机密码:", self.pwd)
+        write(self.username, into=S('//*[@id="userID"]'))  # 用户名
+        write(self.pwd, into=S('//*[@id="userPassword"]'))  # 密码
+        write(self.pwd, into=S('//*[@id="userPassword2"]'))  # 确认密码
+
+
     def login(self,u,p):
         self.name = u.strip('\n')
         self.pwd = p.strip('\n')
@@ -187,6 +239,44 @@ class BaseStartChome():
                 return True
             except:
                 return False
+
+    def check_img_exist(self,img_name):
+        """
+        检测当前页面是否有 图片 存在
+        :param img_name:
+        :return:
+        """
+        self.driver.save_screenshot('./img/screen_all.png')
+        sleep(0.2)
+        try:
+            x, y = PictureRecognition.matchImg(img_name, './img/screen_all.png')
+            return True
+        except:
+            return False
+
+    #print(check_img_exist('./img/ok.png'))
+
+    def click_yanzhengma(self):
+        """
+        验证码识别点击
+        :return:
+        """
+        click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe'))  # 点击弹出验证码
+        sleep(2)
+        img_element = S('//*[@id="rc-imageselect"]').web_element #获取验证码元素
+        GetPng(self.driver).get_geetest_image()  # 获取验证码图片
+
+        l = get_coordinate()  # 获取识别的坐标 [['90', '331'], ['244', '346'], ['213', '436'], ['308', '451']] #g
+        print(l)
+        for position in l:
+            print(position)
+            # 动作链对象
+            action = ActionChains(self.driver)
+            # action.move_to_element_with_offset(img_element,int(position[0])+286,int(position[1])).click().perform()#鼠标移动到元素点击坐标
+            action.move_to_element_with_offset(img_element, int(position[0]),
+                                               int(position[1])).click().perform()  # 鼠标移动到元素点击坐标
+            sleep(0.3)
+        click(Button('Verify')) #点击确认
     def save_txt(self,txt):
         """
         保存文本，用户名， 手机号，机器码
@@ -206,167 +296,6 @@ class BaseStartChome():
             encod = 'utf-8'
         with open('结果.txt', 'a', encoding=encod) as f:
             f.write(txt+'\n')
-    def liucheng1(self):
-        """
-        邮箱注册成功之后的流程的第一步基本信息填写
-        :return:
-        """
-        click(S('//*[@id="a-autoid-0"]/span/input'))#点击批准
-        wait_until(S('//input[@name="pincode"]').exists, timeout_secs=20, interval_secs=0.4)  ## 是否有邮编输入框
-        write(self.temp_dict.get('邮编'),into=S('//input[@name="pincode"]'))
-        write(self.temp_dict.get('街道地址'),into=S('//input[@name="address_line1"]'))
-        write(self.temp_dict.get('城市'), into=S('//input[@name="city"]'))
-        write(self.temp_dict.get('省'), into=S('//input[@name="state"]'))
-        #获取电话号码
-        self.SR = SendRequest()
-        self.phone = self.SR.get_phone()
-        print('获取到的手机号是{}'.format(self.phone))
-        write('+86 {}'.format(self.phone), into=S('//*[@name="phoneno"]'))
-        write(self.temp_dict.get('英文名'),into=S('//input[@name="firstName"]'))
-        write(self.temp_dict.get('英文姓'),into=S('//input[@name="lastName"]'))
-        write(self.temp_dict.get('统一社会信用代码'), into=S('//input[@name="businessLicenseNumber"]'))
-        click(S('//*[@name="Submit"]'))  # 点击保存并继续
-
-
-    def liucheng2(self):
-        print('开始第二步流程')
-        wait_until(S('//*[@name="countryOfCitizenship"]').exists, timeout_secs=100, interval_secs=0.4)  ## 是否有邮编输入框
-        Select(S('//*[@name="countryOfCitizenship"]').web_element).select_by_visible_text('China')#国籍
-        sleep(3)
-        Select(S('//*[@name="countryOfBirth"]').web_element).select_by_visible_text('United States')#出生地
-        sleep(2)
-        def send_data():
-            Select(S(
-                '//div[contains(@id,"PointOfContact_SIV_Identity_")]/div/div/div[2]/form/div/div/div[3]/div/div[2]/div[2]/div[2]/div/div/dropdown-date-picker/div/span[3]/select').web_element).select_by_visible_text(
-                '1993')#出生日期年
-            sleep(0.3)
-            Select(S(
-                '//div[contains(@id,"PointOfContact_SIV_Identity_")]/div/div/div[2]/form/div/div/div[3]/div/div[2]/div[2]/div[2]/div/div/dropdown-date-picker/div/span[2]/select').web_element).select_by_visible_text(
-                'Mar')#出生日期月
-            sleep(0.3)
-            Select(S(
-                '//div[contains(@id,"PointOfContact_SIV_Identity_")]/div/div/div[2]/form/div/div/div[3]/div/div[2]/div[2]/div[2]/div/div/dropdown-date-picker/div/span[1]/select').web_element).select_by_visible_text(
-                '23')#出生日期日
-            sleep(0.3)
-            Select(S(
-                '//div[contains(@id,"PointOfContact_SIV_Identity_")]/div/div/div[2]/form/div/div/div[3]/div/div[3]/div[5]/div/div[1]/div[2]/div/div[1]/div[2]/dropdown-date-picker/div/span[3]/select').web_element).select_by_visible_text(
-                '2023')#有效期 年
-            sleep(0.3)
-            Select(S(
-                '//div[contains(@id,"PointOfContact_SIV_Identity_")]/div/div/div[2]/form/div/div/div[3]/div/div[3]/div[5]/div/div[1]/div[2]/div/div[1]/div[2]/dropdown-date-picker/div/span[2]/select').web_element).select_by_visible_text(
-                'May')#有效期 月
-            sleep(0.3)
-            Select(S(
-                '//div[contains(@id,"PointOfContact_SIV_Identity_")]/div/div/div[2]/form/div/div/div[3]/div/div[3]/div[5]/div/div[1]/div[2]/div/div[1]/div[2]/dropdown-date-picker/div/span[1]/select').web_element).select_by_visible_text(
-                '07')#有效期 日
-            sleep(0.3)
-        send_data()
-        write(self.temp_dict.get('身份证'), into=S('//*[@name="docNumber"]'))
-        write(self.temp_dict.get('中文姓'), into=S('//*[@name="chineseLastName"]'))
-        write(self.temp_dict.get('中文名'), into=S('//*[@name="chineseFirstName"]'))
-        click(S('//*[@id="ExistingAddress"]/div[1]/div/div/div/div/label/input'))
-        write('+86 {}'.format(self.phone), into=S('//*[@id="country-phone-input"]'))
-        click(S('//*[@name="sendVerificationButton" and not(@disabled)]//span[contains(text(),"Text me now")]'))  # 点击提交
-        def get_phone_code(self):
-            phone_code = self.SR.get_phone_msg(self.phone)
-            if phone_code:
-                return phone_code
-            else:#此号码不可用
-                click(S('//*[@id="cancelOTPLink"]/span'))#取消弹窗
-                self.phone = self.SR.get_phone() #重新获取号码
-                write('+86 {}'.format(self.phone), into=S('//*[@id="country-phone-input"]'))
-                click(S('//*[@name="sendVerificationButton" and not(@disabled)]//span[contains(text(),"Text me now")]'))
-                return get_phone_code(self)
-        phone_code = get_phone_code(self)
-        write(phone_code, into=S('//*[@name="otpInput"]'))#输入验证码
-        click(S('//*[@name="verifyOTPButton"]'))#点击提交
-        #if not CheckBox("is a beneficial owner of the business").is_checked():#复选框没有被选中
-        click(CheckBox("is a beneficial owner of the business"))
-        #if not CheckBox("is a legal representative of the business").is_checked():
-        click(CheckBox("is a legal representative of the business"))
-        #if not CheckBox("I confirm that I have added all the beneficial owners of the business.").is_checked():
-        click(CheckBox("I confirm that I have added all the beneficial owners of the business."))
-        click('Save and Continue')  # 点击提交
-        try:
-            wait_until(Text('Enter a valid date of').exists, timeout_secs=2, interval_secs=0.4)  ## 日期没有输入成功
-            send_data()
-            click('Save and Continue')  # 点击提交
-        except:
-            pass
-    def liucheng3(self):
-        print('开始第三步流程')
-        wait_until(S('//*[@name="addCreditCardNumber"]').exists, timeout_secs=100, interval_secs=0.5)  # 需要安全验证
-        write(self.temp_dict.get('银行卡号'), into=S('//*[@name="addCreditCardNumber"]'))
-        Select(S('//*[@name="ccExpirationMonth" and not(@disabled)]').web_element).select_by_visible_text(
-            self.temp_dict.get('到期日'))  # 有效期 日
-        Select(S('//*[@name="ccExpirationYear" and not(@disabled)]').web_element).select_by_visible_text(
-            self.temp_dict.get('到期年'))  # 有效期 日
-        write(self.temp_dict.get('英文姓') + self.temp_dict.get('英文名'), into=S('//*[@name="ccHolderName"]'))
-        #write('854639', into=S('//*[@name="otpInput"]'))  # 输入验证码
-        click('Save')
-        wait_until(S('//*[@name="Submit"]').exists, timeout_secs=60, interval_secs=0.5)
-        click(S('//*[@name="Submit"]'))#保存并继续
-
-    def liucheng4(self):
-        print('开始第四步流程')
-        wait_until(Link('listing your products').exists, timeout_secs=120, interval_secs=0.5)  # 需要安全验证
-        click(Link('listing your products'))
-        name = self.temp_dict.get('商品英文名')
-        try:
-            write(name, into=S('//*[@name="displayNameField"]'))
-        except:
-            self.driver.refresh()
-            write(name, into=S('//*[@name="displayNameField"]'))
-        click(S('//*[@name="Submit"]'))  # 点击提交，但是提交后可能没货
-        def chick():  # 检查是否有货
-            for i in range(1, 1000):
-                try:
-                    wait_until(Text('Not available').exists, timeout_secs=4, interval_secs=0.4)  ## 没保存表示没货
-                    write(name + str(i), into=S('//*[@name="displayNameField"]'))
-                    click(S('//*[@name="Submit"]'))  # 点击提交，但是提交后可能没货
-                except:  # 有货
-                    return
-        chick()
-        try:
-            click('Start listing your products')
-            wait_until(Text('View Credit Card Info').exists, timeout_secs=100, interval_secs=0.5)
-            click(Button('View Credit Card Info'))  #查看信用卡信息
-        except:
-            pass
-        click(Button('Enable Two-Step Verification')) #启动两步验证
-        #这里要输入密码
-        try:
-            write(self.pwd, into=S('//*[@id="ap_password"]'))
-            click(S('//*[@id="signInSubmit"]')) #点击登录
-            self.driver.get('https://sellercentral.amazon.co.uk/authorization/failed/invalid-credit-card?returnTo=%2Fgp%2Fhomepage.html')
-            click(Button('View Credit Card Info'))  # 查看信用卡信息
-            click(Button('Enable Two-Step Verification'))  # 启动两步验证
-        except:
-            pass
-        click(S('//*[@id="sia-otp-accordion-totp-header"]/i')) #点击充应用器注册
-        sleep(1.5)
-        click(Link("Can't scan the barcode?"))
-        sleep(0.2)
-        tet = S('//*[@id="sia-auth-app-formatted-secret"]').web_element.text #这个是生成玛
-        print(tet)
-        try:
-            code = get_make_code(tet)
-        except:
-            sleep(0.3)
-            code = get_make_code(tet)
-        write(code, S('//*[@id="ch-auth-app-code-input"]'))
-        # APP转码这里留着下次做
-        base64_str = S('//*[@id="container"]//img').web_element.get_attribute('src')
-        to_png(base64_str,'./img2/{}.png'.format(self.name)) #保存图片
-        #存储
-        self.save_txt(self.name)
-        self.save_txt(self.phone)
-        self.save_txt(tet)
-        self.save_txt('*'*70)
-        click(S('//*[@id="ch-auth-app-submit"]'))#点击验证
-        if not CheckBox("Don't require OTP on this browser").is_checked():#勾选请勿记住密码
-            click(CheckBox("Don't require OTP on this browser"))
-        click(S('//*[@id="enable-mfa-form-submit"]'))#提交
 
     def quit(self):
         self.driver.quit()

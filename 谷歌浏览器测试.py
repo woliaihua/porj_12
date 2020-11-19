@@ -10,6 +10,7 @@ from url_2_png import get_src_img
 from img_2_text import png_2_text
 from  time import sleep
 from helium import *
+from get_template import *
 from time import  sleep
 import configparser
 from itertools import zip_longest
@@ -23,19 +24,20 @@ from get_template import get_temp_dict
 from send_request import SendRequest
 from selenium.webdriver.support.ui import Select
 from yanzhengqi_oper import get_make_code
-from base64_to_img import to_png
+import sys
 from chick_proxy import servers_chick_ip
 from del_txt_line import del_line#用一行删除一行
 from selenium.webdriver import ActionChains #动作操作
 import datetime
 from xpath_to_png import GetPng
 from chaojiying_Python.chaojiying import get_coordinate
+from picture_recognition import PictureRecognition
+from selenium.webdriver.common.keys import Keys
+from random_str import get_ranrom_str
 """
 滑动图片验证
 """
-from get_template import get_temp_dict,get_filename
-temp_filename = get_filename('.txt', 'template')
-temp_dict = get_temp_dict(temp_filename)  # 模板
+
 def get_file_code(filename):
     f3 = open(filename, 'rb')
     data = f3.read()
@@ -72,28 +74,50 @@ driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {"source": scrip
 # write('+86 18040377309',into=S('//*[@id="country-phone-input"]'))
 # click(S('//*[@id="go"]'))
 print(driver.title)
-# click(S('//*[@id="create-account-button"]'))#点击注册
-#wait_until(Text('我们找不到具有该电子邮件地址的账户').exists, timeout_secs=1, interval_secs=0.4)  # 需要安全验证
-# write('123',into=S('//*[@id="userNameFirst"]'))#firse name
-# write('123', into=S('//*[@id="userNameLast"]'))  # firse name#firse name
-# write('123', into=S('//*[@id="userEmail"]'))  # E-mail Address
-# write('123', into=S('//*[@id="userEmailConfirm"]'))  # Confirm E-mail Address
-click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe')) #点击弹出验证码
-sleep(2)
-img_element = S('//*[@id="rc-imageselect"]').web_element
-GetPng(driver).get_geetest_image() #获取验证码图片
 
-l =get_coordinate()#获取识别的坐标 [['90', '331'], ['244', '346'], ['213', '436'], ['308', '451']] #g
-print(l)
-for position in  l:
-    print(position)
-    #动作链对象
-    action =  ActionChains(driver)
-    #action.move_to_element_with_offset(img_element,int(position[0])+286,int(position[1])).click().perform()#鼠标移动到元素点击坐标
-    action.move_to_element_with_offset(img_element,int(position[0]),int(position[1])).click().perform()#鼠标移动到元素点击坐标
-    sleep(0.3)
-click(Button('Verify'))
-#wait_until(S('//*[@id="auth-captcha-refresh-link" and @style="display: inline;"]').exists, timeout_secs=10, interval_secs=0.4)  ## 是否没货
+
+# def check_img_exist( img_name):
+#     driver.save_screenshot('./img/screen_all.png')
+#     sleep(0.2)
+#     try:
+#         x, y = PictureRecognition.matchImg(img_name, './img/screen_all.png')
+#         return True
+#     except:
+#         return False
+#
+personal_information_filename = get_filename('.txt', '个人信息')
+personal_information_dict = get_temp_dict(personal_information_filename)  # 个人信息
+phone_filename = get_filename('.txt', '个人电话')
+phone_dict = get_phone_dict(phone_filename)  # 个人电话
+email_filename = get_filename('.txt', '个人邮箱')
+email_dict = get_email_dict(email_filename)  # 邮箱
+# driver.get('https://applications.labor.ny.gov/IndividualReg/xhtml/individual/emailVerification.faces')
+# write(personal_information_dict.get('First 名字'), into=S('//*[@id="userNameFirst"]'))  # firse name
+# write(personal_information_dict.get('last 姓'), into=S('//*[@id="userNameLast"]'))  # last name
+# write(email_dict.get('邮箱地址'), into=S('//*[@id="userEmail"]'))  # E-mail Address
+# write(email_dict.get('邮箱地址'), into=S('//*[@id="userEmailConfirm"]'))  # Confirm E-mail Address
+# click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe')) #点击弹出验证码
+# print('请输出验证码')
+# for i in range(100):
+#     sleep(1)
+#     img_exist = check_img_exist('./img/ok.png')
+#     if img_exist:#ok图片存在表示成功
+#         break
+#     else:
+#         print('循环检测验证码是否验证成功种...')
+#     if i == 99:
+#         print('超时，程序退出')
+#         sys.exit()
+#
+# print("生成随机用户名:",username)
+# pwd = get_ranrom_str(16)
+# print("生成随机密码:",username)
+# write(username, into=S('//*[@id="userID"]'))  #  用户名
+# write(pwd, into=S('//*[@id="userPassword"]'))  # 密码
+# write(pwd, into=S('//*[@id="userPassword2"]'))  # 确认密码
+#
+# write('123', into=S('//*[@id="userEmailConfirm"] '))  # Confirm E-mail Address
+# wait_until(S('//*[@id="auth-captcha-refresh-link" and @style="display: inline;"]').exists, timeout_secs=2, interval_secs=0.4)  ## 是否没货
 print(datetime.datetime.now())
 #if not CheckBox("is a beneficial owner of the business").is_checked():  # 复选框没有被选中
 # click(CheckBox("is a beneficial owner of the business"))
@@ -101,9 +125,10 @@ print(datetime.datetime.now())
 # if not CheckBox("Don't require OTP on this browser").is_checked():
 #     click(CheckBox("Don't require OTP on this browser"))
 # write(temp_dict.get('银行卡号'), into=S('//*[@name="addCreditCardNumber"]'))
-# Select(S('//*[@name="ccExpirationMonth" and not(@disabled)]').web_element).select_by_visible_text(temp_dict.get('到期日'))#有效期 日
+Select(S('//*[@id="userSecret1Question"]').web_element).select_by_visible_text('What was the name of my first pet?')#有效期 日
 # Select(S('//*[@name="ccExpirationYear" and not(@disabled)]').web_element).select_by_visible_text(temp_dict.get('到期年'))#有效期 日
-# write(temp_dict.get('英文姓')+temp_dict.get('英文名'), into=S('//*[@name="ccHolderName"]'))
+userSecret1Answer = get_ranrom_str(12)
+write(userSecret1Answer, into=S('//*[@id="userSecret1Answer"]'))
 
 #click(S('//*[@id="cancelOTPLink"]/span'))  # 点击提交，但是提交后可能没货
 # txt = S('//*[@id="container"]//img').web_element.get_attribute('src')

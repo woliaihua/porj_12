@@ -19,7 +19,7 @@ def get_filename(endswith, filename):
 
 def get_temp_dict(filename):
     """
-    获取需要 填写的文本信息
+    获取个人信息文本信息
     :return: 字典
     """
     def get_file_code(filename):
@@ -30,17 +30,73 @@ def get_temp_dict(filename):
         return encode
     dict1 = {}
     with open(filename,'r',encoding=get_file_code(filename)) as f:
-        for line in f.readlines():
-            if line:
+        for index,line in enumerate(f.readlines()):
+            if index==0:
+                continue
+            else:
                 try:
-                    l =line.split('：')
-                    dict1[l[0].strip()] = l[1].strip('\n')
+                    l = line.split('----')
+                    dict1['First 名字'] = l[0].strip().strip('\n')
+                    dict1['last 姓'] = l[1].strip().strip('\n')
+                    dict1['个人地址'] = l[2].strip().strip('\n')
+                    dict1['个人市'] = l[3].strip().strip('\n')
+                    dict1['个人邮编'] = l[4].strip().strip('\n')
+                    dict1['SSN'] = l[5].strip().strip('\n')
+                    dict1['生日'] = l[6].strip().strip('\n')
+                    dict1['驾照号'] = l[7].strip().strip('\n')
+                    dict1['公司名字'] = l[8].strip().strip('\n')
+                    dict1['公司地址'] = l[9].strip().strip('\n')
+                    dict1['公司市'] = l[10].strip().strip('\n')
+                    dict1['公司邮编'] = l[11].strip().strip('\n')
+                    dict1['公司电话'] = l[12].strip().strip('\n')
+                    break
                 except:
-                    pass
+                    print(filename+"第{}行格式不对，跳过此行".format(index+1))
     return dict1
-
+def get_phone_dict(filename):
+    """
+    获取个人信息文本信息
+    :return: 字典
+    """
+    def get_file_code(filename):
+        f3 = open(filename, 'rb')
+        data = f3.read()
+        encode = chardet.detect(data).get('encoding')
+        f3.close()
+        return encode
+    dict1 = {}
+    with open(filename,'r',encoding=get_file_code(filename)) as f:
+        for index,line in enumerate(f.readlines()):
+            try:
+                dict1['电话'] = line.strip().strip('\n')
+                break
+            except:
+                print(filename+"第{}行格式不对，跳过此行".format(index+1))
+    return dict1
+def get_email_dict(filename):
+    """
+    获取个人信息文本信息
+    :return: 字典
+    """
+    def get_file_code(filename):
+        f3 = open(filename, 'rb')
+        data = f3.read()
+        encode = chardet.detect(data).get('encoding')
+        f3.close()
+        return encode
+    dict1 = {}
+    with open(filename,'r',encoding=get_file_code(filename)) as f:
+        for index,line in enumerate(f.readlines()):
+            try:
+                l = line.split('----')
+                dict1['邮箱地址'] = l[0].strip().strip('\n')
+                dict1['邮箱密码'] = l[1].strip().strip('\n')
+                break
+            except:
+                print(filename+"第{}行格式不对，跳过此行".format(index+1))
+    return dict1
 if __name__ == '__main__':
-    filename = get_filename('.txt', 'template')
-    print(get_temp_dict(filename))
-    print(get_filename('.txt','template'))
-    os.remove(filename)
+    filename = get_filename('.txt', '个人邮箱')
+    print(get_email_dict(filename))
+    # print(get_filename('.txt','template'))
+    # os.remove(filename)

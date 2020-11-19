@@ -1,0 +1,8 @@
+First 名字---- last 姓----个人地址----个人市----个人邮编----SSN----生日----驾照号----公司名字----公司地址----公司市----公司邮编----公司电话
+peter----tyler----581 OCEAN PKWY----BROOKLYN----11218----251531186----1985/5/19----103363907----Sweet Chick----164 Bedford Ave----Brooklyn----11211----3477254793
+ashanta----murray----28 Florence Ave----Hempstead----11550----079722977----1985/5/19----969519120----kiko Ramen----361 Nassau Blvd----Garden City South----11530----5163079211
+daw----dobbs----1607 JAY ST----OGDENSBURG----13669----079604335----1971/1/22----617265778----The Place----1612 Ford St----Ogdensburg----13669----3153933080
+keyla----bates----164 Ridge Ave Apt 1----Yonkers----10703----092662127----1982/8/28----642431699----X20 on the Hudson----71 Water Grant St----Yonkers----10701----9149651111
+jessica----delvalle----755 Southern Blvd----Bronx----10455----079641061----1979/8/8----916576529----Benjamin Steakhouse----610 Hartsdale Rd----White Plains----10607----9144286868
+
+

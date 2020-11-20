@@ -21,7 +21,7 @@ from chaojiying_Python.chaojiying import get_coordinate
 from selenium.webdriver import ActionChains #动作操作
 from picture_recognition import PictureRecognition
 from random_str import get_ranrom_str
-
+import sys
 
 
 setlocale(LC_NUMERIC, 'English_US')
@@ -73,22 +73,21 @@ class BaseStartChome():
     反爬模式启动浏览器
     """
 
-    def __init__(self,port,ip):
+    def __init__(self,port):
         self.personal_information_filename = get_filename('.txt', '个人信息')
         self.personal_information_dict = get_temp_dict(self.personal_information_filename)  # 个人信息
         self.phone_filename = get_filename('.txt', '个人电话')
         self.phone_dict = get_phone_dict(self.phone_filename)  # 个人电话
         self.email_filename = get_filename('.txt', '个人邮箱')
         self.email_dict = get_email_dict(self.email_filename)  # 邮箱
-        self.ip = ip
         #kill_pid(port)
         kill_all_chorme()
         sleep(3)
         # 关闭进程
-        #self.cmd = r'"{chrome_path}" --remote-debugging-port={port} --user-data-dir="C:\selenum\AutomationProfile{port}" --window-size=1080,800 '.format(chrome_path=chrome_path,port=port)  # --headless
+        self.cmd = r'"{chrome_path}" --remote-debugging-port={port} --user-data-dir="C:\selenum\AutomationProfile{port}" --window-size=1080,800 '.format(chrome_path=chrome_path,port=port)  # --headless
         #加代理ip，#标记要修改
-        self.cmd = r'"{chrome_path}" --remote-debugging-port={port} --user-data-dir="C:\selenum\AutomationProfile{port}" --window-size=1080,800 --proxy-server=http://{ip}'.format(
-            chrome_path=chrome_path, port=port, ip=ip)  # --headless
+        # self.cmd = r'"{chrome_path}" --remote-debugging-port={port} --user-data-dir="C:\selenum\AutomationProfile{port}" --window-size=1080,800 --proxy-server=http://{ip}'.format(
+        #     chrome_path=chrome_path, port=port, ip=ip)  # --headless
         os.popen(self.cmd)
         chrome_options = Options()
         chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:{port}".format(port=port))
@@ -123,7 +122,7 @@ class BaseStartChome():
         检查验证码是否正常通过
         :return:
         """
-        for i in range(100):
+        for i in range(200):
             if i == 0:
                 sleep(2.5)
             sleep(1)
@@ -132,7 +131,7 @@ class BaseStartChome():
                 print('验证码通过')
                 return
             else:
-                print('循环检测验证码是否验证成功种...')
+                print('循环检测验证码是否验证成功...')
             if i == 99:
                 print('超时，程序退出')
                 sys.exit()
@@ -142,28 +141,45 @@ class BaseStartChome():
         第一二张：注册
         :return:
         """
+        self.firse_name = self.personal_information_dict.get('First 名字')
+        self.last_name = self.personal_information_dict.get('last 姓')
+        self.email = self.email_dict.get('邮箱地址')
         self.driver.get('https://applications.labor.ny.gov/IndividualReg/xhtml/individual/emailVerification.faces')
-        write(self.personal_information_dict.get('First 名字'), into=S('//*[@id="userNameFirst"]'))  # firse name
-        write(self.personal_information_dict.get('last 姓'), into=S('//*[@id="userNameLast"]'))  # last name
-        write(self.email_dict.get('邮箱地址'), into=S('//*[@id="userEmail"]'))  # E-mail Address
-        write(self.email_dict.get('邮箱地址'), into=S('//*[@id="userEmailConfirm"]'))  # Confirm E-mail Address
+        write(self.firse_name, into=S('//*[@id="userNameFirst"]'))  # firse name
+        write(self.last_name, into=S('//*[@id="userNameLast"]'))  # last name
+        write(self.email, into=S('//*[@id="userEmail"]'))  # E-mail Address
+        write(self.email, into=S('//*[@id="userEmailConfirm"]'))  # Confirm E-mail Address
         click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe')) #点击弹出验证码
         print('请输出验证码')
         self.chick_yanzhengma()#开始检查验证码是否通过
         # click(Link('Contact Us'))  # 打开一个新的标签页面
         # switch_to(find_all(Window())[0])  # 切换到第0个窗口
         click(S('//*[@id="buttondoAddReg"]'))  # 点击continue
+        self.save_txt('firse name: {}'.format(self.firse_name))
+        self.save_txt('last_name: {}'.format(self.last_name))
+        self.save_txt('email: {}'.format(self.email))
+
 
     def liucheng2(self):
         """
         第三四张：激活邮箱
         :return:
         """
+        print('开始激活邮箱')
+        self.email_pwd = self.email_dict.get('邮箱密码')
         #switch_to(find_all(Window())[1])  # 打开第0个窗口
         self.driver.get("https://login.yahoo.com/")
-        write('VioletAugustinelAa84460@yahoo.com', into=S('//*[@id="login-username"]'))  # 输入邮箱地址
+        self.driver.delete_all_cookies()
+        self.driver.refresh()
+        try:
+            wait_until(S('//*[@id="login-username"]').exists, timeout_secs=2, interval_secs=0.4)
+        except:
+            click(Link('Sign in'))
+            wait_until(Link('Use another account').exists, timeout_secs=2, interval_secs=0.4)
+            click(Link('Use another account'))
+        write(self.email, into=S('//*[@id="login-username"]'))  # 输入邮箱地址
         click(S('//*[@id="login-signin"]'))  # 点击下一步
-        write('ziIgJAbUKCr', into=S('//*[@id="login-passwd"]'))  # E-mail Address
+        write(self.email_pwd, into=S('//*[@id="login-passwd"]'))  # E-mail Address
         click(S('//*[@id="login-signin"]'))  # 点击下一步
         click(S('//*[@id="ybarMailLink"]/span[1]'))  # 点击收件箱
         for i in range(60):
@@ -175,13 +191,28 @@ class BaseStartChome():
             if i == 59:
                 print('1分钟还未收到邮件，程序退出')
                 sys.exit()
-        click(Link('Click here to continue with the registration process.'))  # 点击第一封邮件
+        self.save_txt('邮箱密码：{}'.format(self.email_pwd))
+        try:
+            click(Link('Click here to continue with the registration process.'))  # 点击激活链接
+        except:
+            sleep(1)
+            try:
+                click(Text('Individual Account Creation for Online Services'))  # 点击第一封邮件
+                click(Link('Click here to continue with the registration process.'))  # 点击激活链接
+            except:
+                print('没有收到邮件')
 
     def liucheng3(self):
         """
         第五张图，激活邮件种输入详细信息
         :return:
         """
+        try:
+            write(self.firse_name, into=S('//*[@id="userNameFirst"]'))  # firse name
+            write(self.last_name, into=S('//*[@id="userNameLast"]'))  # last name
+            write(self.email, into=S('//*[@id="userEmail"]'))  # E-mail Address
+        except:
+            pass
         self.username = get_ranrom_str(12)
         print("生成随机用户名:", self.username)
         self.pwd = get_ranrom_str(16)
@@ -189,6 +220,68 @@ class BaseStartChome():
         write(self.username, into=S('//*[@id="userID"]'))  # 用户名
         write(self.pwd, into=S('//*[@id="userPassword"]'))  # 密码
         write(self.pwd, into=S('//*[@id="userPassword2"]'))  # 确认密码
+        # 问题1
+        Select(S('//*[@id="userSecret1Question"]').web_element).select_by_visible_text(
+            'What was the name of my first pet?')  # 有效期 日
+        Answer1 = get_ranrom_str(12)
+        write(Answer1, into=S('//*[@id="userSecret1Answer"]'))
+        write(Answer1, into=S('//*[@id="userSecret1AnswerConf"]'))
+        # 问题2
+        Select(S('//*[@id="userSecret2Question"]').web_element).select_by_visible_text(
+            "What was my first grade teacher's last name?")  # 有效期 日
+        Answer2 = get_ranrom_str(12)
+        write(Answer2, into=S('//*[@id="userSecret2Answer"]'))
+        write(Answer2, into=S('//*[@id="userSecret2AnswerConf"]'))
+        # 问题3
+        Select(S('//*[@id="userSecret3Question"]').web_element).select_by_visible_text(
+            "What is the first name of my childhood best friend?")  # 有效期 日
+        Answer3 = get_ranrom_str(12)
+        write(Answer3, into=S('//*[@id="userSecret3Answer"]'))
+        write(Answer3, into=S('//*[@id="userSecret3AnswerConf"]'))
+        click(S('//*[@id="buttondoAddReg"]'))#点击继续
+        self.save_txt('用户名：{}'.format(self.username))
+        self.save_txt('密码：{}'.format(self.pwd))
+        self.save_txt('问题1：{}'.format('What was the name of my first pet?'))
+        self.save_txt('答案1：{}'.format(Answer1))
+        self.save_txt('确认答案1：{}'.format(Answer1))
+        self.save_txt('问题2：{}'.format("What was my first grade teacher's last name?"))
+        self.save_txt('确认答案2：{}'.format(Answer2))
+        self.save_txt('描述2：{}'.format(Answer2))
+        self.save_txt('问题3：{}'.format('What is the first name of my childhood best friend?'))
+        self.save_txt('确认答案3：{}'.format(Answer3))
+        self.save_txt('描述3：{}'.format(Answer3))
+
+    def liucheng4(self):
+        """
+        图片6,7 填写生日 SSN ， 和确认提交
+        :return:
+        """
+        birth_date = self.personal_information_dict.get('生日')#1985/5/19
+        birth_date = birth_date.split('/')
+        if len(birth_date[1]) == 1:
+            birth_date[1] = '0'+birth_date[1]
+        str2 = birth_date[1] + '/'+ birth_date[2] + '/' + birth_date[0]
+        write(str2, into=S('//*[@id="formRegister:dob"]'))#生日
+        self.save_txt('生日：{}'.format(str2))
+        SSN = self.personal_information_dict.get('SSN')  # 1985/5/19
+        write(SSN, into=S('//*[@id="formRegister:UIClaimant_social"]'))#SSN
+        self.save_txt('SSN：{}'.format(SSN))
+        click(S('//*[@id="formRegister:buttondoAddReg"]')) #确认
+        click(S('//*[@id="formRegister:buttondoReg"]')) #图片7 确认
+
+    def liucheng5(self):
+        """
+        图片9，10
+        :return:
+        """
+        self.driver.get('https://applications.labor.ny.gov/IndividualReg/xhtml/individual/home.faces?ptnx=1')
+        click(S('//*[@id="signInButton"]')) #点击 sign in
+        write(self.username, into=S('//*[@id="loginform:username"]'))  # 用户名
+        write(self.pwd, into=S('//*[@id="loginform:password"]'))  # 密码
+        click(S('//*[@id="recaptcha-anchor-label"]'))    # 点击弹出验证码
+        print('请输出验证码')
+        self.chick_yanzhengma()  # 开始检查验证码是否通过
+        click(S('//*[@id="loginform:signinButton"]'))
 
 
     def login(self,u,p):
@@ -277,100 +370,29 @@ class BaseStartChome():
                                                int(position[1])).click().perform()  # 鼠标移动到元素点击坐标
             sleep(0.3)
         click(Button('Verify')) #点击确认
+
+
     def save_txt(self,txt):
         """
         保存文本，用户名， 手机号，机器码
         :param txt:
         :return:
         """
-        def get_file_code():
-            f3 = open('结果.txt', 'rb')
-            data = f3.read()
-            encode = chardet.detect(data).get('encoding')
-            f3.close()
-            return encode
-
-        try:
-            encod = get_file_code()
-        except:
-            encod = 'utf-8'
-        with open('结果.txt', 'a', encoding=encod) as f:
+        filename ='./result/'+ self.last_name+self.last_name+'.txt'
+        encod = 'utf-8'
+        with open(filename, 'a', encoding=encod) as f:
             f.write(txt+'\n')
 
     def quit(self):
         self.driver.quit()
-def get_ip():
-    with open("ip.txt", "r", encoding='utf-8') as f:
-        txt_lines = f.readlines()
-    for txt_line in txt_lines:
-        ip = txt_line.strip('\n')
-        if servers_chick_ip(ip):
-            return ip
-        else:
-            del_line(ip, 'ip.txt')
-            sleep(0.05)
 
-def setup(B, line):
-    try:
-        u = line.split('----')[0].strip('\n')
-        p = line.split('----')[1].strip('\n')
-    except:
-        u= ''
-        p =''
-        print(line + '格式不对')
-    if u:
-        # #登录,且发送注册邮件
-        state_login = B.login(u, p)
-        if state_login:
-            print('登录成功，开始获取邮箱信息')
-            # 打开网易邮箱登录框，登录
-            url =get_url(u, p)
-            B.driver.get(url)
-            if B.chick_liucheng_bakeup():
-                B.liucheng1()
-                B.liucheng2()
-                B.liucheng3()
-                B.liucheng4()
-                os.remove(B.temp_filename)#删除模板文件
-            else:
-                print("出现We're sorry!页面，跳过账号！")
-            B.quit()
-        else:
-            print(u + '登录失败！开始下一个')
-
+def setup(B):
+    B.liucheng1()
+    B.liucheng2()
+    B.liucheng3()
+    B.liucheng4()
 
 
 if __name__ == '__main__':
-    import sys
-    #文件对象是迭代器。要一次迭代文件N行，与线程数一致，一次迭代N行就执行多少个线程
-    def grouper(iterable, n, fillvalue=None):
-        args = [iter(iterable)] * n
-        return zip_longest(*args, fillvalue=fillvalue)
-    # 分批读取账号
-    with open('邮箱.txt', 'r') as f:
-        txt_lines = f.readlines()
-    def setup_chick_ip(port):
-        ip = get_ip()
-        if ip:
-            B = BaseStartChome(port, ip)
-            ip_state = B.ip_state
-            if not ip_state:  # ip不可用
-                print(ip, '不可用，切换ip')
-                setup_chick_ip(port)
-            return B
-        else:
-            print('没有ip了，退出程序！')
-            sys.exit()
-    ip_num = 1  # 几次账号就换一次ip
-    for lines in grouper(txt_lines, int(ip_num), ''):
-        B = setup_chick_ip(9022)
-        for line in lines:  # 一次读取N个账号
-            setup(B, line)
-        print('切换ip')
-        B.driver.quit()
-
-    # with open('邮箱.txt', 'r') as f:
-    #     for line in f.readlines():
-    #         B = BaseStartChome(9022, 'ip')
-    #         setup(B,line,'port')
-            #print(1+'1')
+    B = BaseStartChome(9022)
+    setup(B)

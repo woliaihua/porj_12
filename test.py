@@ -1,8 +1,45 @@
-from random import Random
-str = ''
-chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789'
-length = len(chars) - 1
-random = Random()
-for i in range(16):
-    str+=chars[random.randint(0,length)]
-print(str)
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+from helium import *
+from itertools import zip_longest
+from kill_prot import *
+from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
+from locale import atof,setlocale,LC_NUMERIC
+from email_oper import *
+from get_template import *
+from send_request import SendRequest
+from selenium.webdriver.support.ui import Select
+from yanzhengqi_oper import get_make_code
+from base64_to_img import to_png
+from chick_proxy import servers_chick_ip
+from del_txt_line import del_line#用一行删除一行
+from url_2_png import get_src_img
+from email_oper import get_url
+from xpath_to_png import GetPng
+from chaojiying_Python.chaojiying import get_coordinate
+from selenium.webdriver import ActionChains #动作操作
+from picture_recognition import PictureRecognition
+from random_str import get_ranrom_str
+import sys
+
+email_filename = get_filename('.txt', '个人邮箱')
+email_dict = get_email_dict(email_filename)  # 邮箱
+email_pwd = email_dict.get('邮箱密码')
+
+
+def save_txt(txt):
+    """
+    保存文本，用户名， 手机号，机器码
+    :param txt:
+    :return:
+    """
+    filename = './result/tylertyler.txt'
+
+    encod = 'utf-8'
+
+    with open(filename, 'a', encoding=encod) as f:
+        f.write(txt + '\n')
+line = '但是email password: {}'.format(email_pwd)
+print(line)
+save_txt(line)

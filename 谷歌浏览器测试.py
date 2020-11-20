@@ -97,18 +97,9 @@ email_dict = get_email_dict(email_filename)  # 邮箱
 # write(email_dict.get('邮箱地址'), into=S('//*[@id="userEmail"]'))  # E-mail Address
 # write(email_dict.get('邮箱地址'), into=S('//*[@id="userEmailConfirm"]'))  # Confirm E-mail Address
 # click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe')) #点击弹出验证码
-# print('请输出验证码')
-# for i in range(100):
-#     sleep(1)
-#     img_exist = check_img_exist('./img/ok.png')
-#     if img_exist:#ok图片存在表示成功
-#         break
-#     else:
-#         print('循环检测验证码是否验证成功种...')
-#     if i == 99:
-#         print('超时，程序退出')
-#         sys.exit()
-#
+firse_name = personal_information_dict.get('First 名字')
+last_name = personal_information_dict.get('last 姓')
+email = email_dict.get('邮箱地址')
 # print("生成随机用户名:",username)
 # pwd = get_ranrom_str(16)
 # print("生成随机密码:",username)
@@ -125,15 +116,20 @@ print(datetime.datetime.now())
 # if not CheckBox("Don't require OTP on this browser").is_checked():
 #     click(CheckBox("Don't require OTP on this browser"))
 # write(temp_dict.get('银行卡号'), into=S('//*[@name="addCreditCardNumber"]'))
-Select(S('//*[@id="userSecret1Question"]').web_element).select_by_visible_text('What was the name of my first pet?')#有效期 日
-# Select(S('//*[@name="ccExpirationYear" and not(@disabled)]').web_element).select_by_visible_text(temp_dict.get('到期年'))#有效期 日
-userSecret1Answer = get_ranrom_str(12)
-write(userSecret1Answer, into=S('//*[@id="userSecret1Answer"]'))
+#click(S('//*[@id="formRegister:buttondoReg"]')) #图片7 确认
 
 #click(S('//*[@id="cancelOTPLink"]/span'))  # 点击提交，但是提交后可能没货
 # txt = S('//*[@id="container"]//img').web_element.get_attribute('src')
+def save_txt( txt):
+    """
+    保存文本，用户名， 手机号，机器码
+    :param txt:
+    :return:
+    """
+    filename = './result/' + last_name + last_name + '.txt'
+    encod = 'utf-8'
+    with open(filename, 'a', encoding=encod) as f:
+        f.write(txt + '\n')
 
-# click(S('//*[@name="Submit"]'))  # 点击保存并继续
-
-#liucheng4()
-#wait_until(Text('验证码输入有误，请重新输入').exists, timeout_secs=2, interval_secs=0.4)  # 需要安全验证
+# wait_until(S('//*[@id="login-username"]').exists, timeout_secs=2, interval_secs=0.4)
+#wait_until(Link('使用其他帐户').exists, timeout_secs=2, interval_secs=0.4)  # 需要安全验证

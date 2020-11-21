@@ -274,14 +274,20 @@ class BaseStartChome():
         图片9，10
         :return:
         """
-        self.driver.get('https://applications.labor.ny.gov/IndividualReg/xhtml/individual/home.faces?ptnx=1')
+        self.driver.get('www.labor.ny.gov/signin')
         click(S('//*[@id="signInButton"]')) #点击 sign in
+        try:
+            wait_until(S('//*[@id="CommonNavSignoutLinktxt2"]').exists, timeout_secs=2, interval_secs=0.4)  # 需要退出登录
+            click(S('//*[@id="CommonNavSignoutLinktxt2"]'))
+            click(S('//*[@id="signInButton"]'))  # 点击 sign in
+        except:
+            pass
         write(self.username, into=S('//*[@id="loginform:username"]'))  # 用户名
         write(self.pwd, into=S('//*[@id="loginform:password"]'))  # 密码
         click(S('//*[@id="recaptcha-anchor-label"]'))    # 点击弹出验证码
         print('请输出验证码')
         self.chick_yanzhengma()  # 开始检查验证码是否通过
-        click(S('//*[@id="loginform:signinButton"]'))
+        click(S('//*[@id="loginform:signinButton"]'))#点击登录
 
 
     def login(self,u,p):

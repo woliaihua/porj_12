@@ -130,6 +130,10 @@ def save_txt( txt):
     encod = 'utf-8'
     with open(filename, 'a', encoding=encod) as f:
         f.write(txt + '\n')
-
+#
+# write('gnrxl8QmhNgQ', into=S('//*[@id="loginform:username"]'))  #  用户名
+# write('UOiqdORMvV13Zlf3', into=S('//*[@id="loginform:password"]'))  # 密码
+#click(S('//*[@id="loginform:signinButton"]'))#点击登录
 # wait_until(S('//*[@id="login-username"]').exists, timeout_secs=2, interval_secs=0.4)
-#wait_until(Link('使用其他帐户').exists, timeout_secs=2, interval_secs=0.4)  # 需要安全验证
+#wait_until(S('//*[@id="CommonNavSignoutLinktxt2"]').exists, timeout_secs=2, interval_secs=0.4)  # 需要退出登录
+click(S('//*[@id="recaptcha-anchor-label"]'))

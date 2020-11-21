@@ -28,18 +28,6 @@ email_dict = get_email_dict(email_filename)  # 邮箱
 email_pwd = email_dict.get('邮箱密码')
 
 
-def save_txt(txt):
-    """
-    保存文本，用户名， 手机号，机器码
-    :param txt:
-    :return:
-    """
-    filename = './result/tylertyler.txt'
-
-    encod = 'utf-8'
-
-    with open(filename, 'a', encoding=encod) as f:
-        f.write(txt + '\n')
-line = '但是email password: {}'.format(email_pwd)
-print(line)
-save_txt(line)
+str1 = 'gnrxl8QmhNgQ'
+for i in str1:
+    MouseToClick.oneKey(i)

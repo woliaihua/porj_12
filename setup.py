@@ -20,7 +20,7 @@ from xpath_to_png import GetPng
 from chaojiying_Python.chaojiying import get_coordinate
 from selenium.webdriver import ActionChains #动作操作
 from picture_recognition import PictureRecognition
-from random_str import get_ranrom_str
+from random_str import *
 import sys
 
 
@@ -274,21 +274,132 @@ class BaseStartChome():
         图片9，10
         :return:
         """
-        self.driver.get('www.labor.ny.gov/signin')
-        click(S('//*[@id="signInButton"]')) #点击 sign in
+        self.driver.get('https://www.labor.ny.gov/signin')
+        click(S('//*[@id="signInButton"]'))  # 点击 sign in
         try:
-            wait_until(S('//*[@id="CommonNavSignoutLinktxt2"]').exists, timeout_secs=2, interval_secs=0.4)  # 需要退出登录
-            click(S('//*[@id="CommonNavSignoutLinktxt2"]'))
-            click(S('//*[@id="signInButton"]'))  # 点击 sign in
+            write(self.username, into=S('//*[@id="loginform:username"]'))  # 用户名
+            write(self.pwd, into=S('//*[@id="loginform:password"]'))  # 密码
         except:
-            pass
-        write(self.username, into=S('//*[@id="loginform:username"]'))  # 用户名
-        write(self.pwd, into=S('//*[@id="loginform:password"]'))  # 密码
-        click(S('//*[@id="recaptcha-anchor-label"]'))    # 点击弹出验证码
-        print('请输出验证码')
-        self.chick_yanzhengma()  # 开始检查验证码是否通过
-        click(S('//*[@id="loginform:signinButton"]'))#点击登录
+            print('已被登录，开始退出登录')
+            click(S('//*[@id="CommonNavSignoutLinktxt2"]'))  # 需要退出登录
+            try:
+                wait_until(S('//*[@id="CommonNavSignoutLinktxt2"]').exists, timeout_secs=10,
+                           interval_secs=0.4)  # 没有退出登录成功
+                click(S('//*[@id="CommonNavSignoutLinktxt2"]'))  # 需要退出登录
+            except:
+                pass
+            try:
+                wait_until(S('//*[@id="signInButton"]').exists, timeout_secs=30, interval_secs=0.4)  # sign in存在
+                click(S('//*[@id="signInButton"]'))  # 点击 sign in
+                sleep(1)
+            except Exception as e:
+                pass
+                self.check_img_exist('/img/login.png')
+            print('开始输入用户名密码')
+            write(self.username, into=S('//*[@id="loginform:username"]'))  # 用户名
+            write(self.pwd, into=S('//*[@id="loginform:password"]'))  # 密码
+        print("请手动输入验证码")
+        self.chick_yanzhengma()
+        click(S('//*[@id="loginform:signinButton"]'))  # 点击登录
+    def liucheng6(self):
+        """
+        图片11，12
+        :return:
+        """
+        wait_until(Link('Unemployment Services').exists, timeout_secs=40, interval_secs=0.4)
+        click(Link('Unemployment Services'))  # 点击Unemployment Services
+        write(self.personal_information_dict.get('SSN'), into=S('//*[@id="form:uiClaimant_ssn1to9"]'))
+        write(self.personal_information_dict.get('SSN'), into=S('//*[@id="form:uiClaimant_confirmSsn1to9"]'))
+        click(S('//*[@id="form:submitClaimantInfo"]'))#点击提交
+    def liucheng7(self):
+        """
+        图片13
+        :return:
+        """
+        PIN = get_ranrom_pin(4)
+        print("生成随机PIN:", PIN)
+        write(PIN, into=S('//*[@id="form:uiClaimant_pin_new"]'))
+        write(PIN, into=S('//*[@id="form:uiClaimant_pin_confirm"]'))
+        self.save_txt("PIN:{}".format(PIN))
+        mother_name = get_ranrom_name(7)
+        print("生成随机Mother's Maiden Name:", mother_name)
+        write(mother_name, into=S('//*[@id="form:uiClaimant_maidenName"]'))
+        write(mother_name, into=S('//*[@id="form:uiClaimant_maidenNameConf"]'))
+        self.save_txt("Mother's Maiden Name:{}".format(mother_name))
+        click(S('//*[@id="form:submitNewPinMmn"]'))  # 点击提交
+        print('请手动识别验证码')
 
+
+    def liucheng8(self):
+        """
+        图片14，15，16
+        :return:
+        """
+        try:
+            wait_until(Text('File A Claim').exists, timeout_secs=400, interval_secs=0.4)
+            click(S('//*[@id="content"]/form[1]/input[5]')) #点击File A Claim
+        except:
+            print('或许图片识别超时')
+        click(S('//*[@id="content"]/form/center/input')) #点击继续
+        click(S('//*[@name="button" and @value="I Agree"]'))#点击同意
+
+    def liucheng9(self):
+        """
+        图片17
+        :return:
+        """
+        Select(S('//*[@id="UC1G01_F05"]').web_element).select_by_visible_text('0')
+        click(S('//*[@id="UC1G01_F06"]'))  # 第二行单选选 no
+        write('2020', into=S('//*[@id="UC1G01_F07_Year"]'))
+        Select(S('//*[@id="UC1G01_F07_Day"]').web_element).select_by_visible_text('5')
+        Select(S('//*[@id="UC1G01_F07_Month"]').web_element).select_by_visible_text('May')
+        click(S('//*[@id="UC1G01_F2001"]'))  # 第4行单选选 yes
+        click(S('//*[@id="UC1G01_F111"]'))  # 第5行单选选 yes
+        click(S('//*[@id="UC1G01_F101"]'))  # 第6行单选选 yes
+        click(S('//*[@id="UC1G01_F12"]'))  # 倒数第二行选no
+        click(S('//*[@id="UC1G01_F13"]'))  # 倒数第一行选no
+        click(S('//input[@value="Continue"]'))#点击提交
+
+    def liucheng10(self):
+        """
+        图片18
+        :return:
+        """
+        print('开始图片18操作')
+        write(self.personal_information_dict.get('驾照号'), into=S('//*[@id="UC1G04_F08"]'))
+        Select(S('//*[@id="UC1G04_F09"]').web_element).select_by_visible_text('One employer')
+        click(S('//input[@value="Continue"]'))  # 点击提交
+
+    def liucheng11(self):
+        """
+        图片19
+        :return:
+        """
+        print('开始图片19操作')
+        url = "https://uihp2.labor.ny.gov/UBOC/uiGateway"
+        click(S('//*[@id="UC1G07_F011"]'))  # 第1行单选选 yes
+        click(S('//*[@id="UC1G07_F02"]'))  # 第3行单选选 no
+        click(S('//*[@id="UC1G07_F03"]'))  # 第6行单选选 no
+        click(S('//*[@id="UC1G07_F04"]'))  # 第7行单选选 no
+        click(S('//*[@id="UC1G07_F05"]'))  # 倒数第二行选no
+        click(S('//*[@id="UC1G07_F06"]'))  # 倒数第一行选no
+        click(S('//input[@value="Continue"]'))  # 点击提交
+
+    def liucheng12(self):
+        """
+        图片19
+        :return:
+        """
+        click(S('//*[@id="UC1G08_F071"]'))  # 第1行单选选 yes
+        click(S('//*[@id="UC1G08_F08"]'))  # 第3行单选选 no
+        click(S('//*[@id="UC1G08_F08_B0"]'))  # 第6行单选选 no
+        click(S('//*[@id="UC1G08_F09"]'))  # 第7行单选选 no
+        click(S('//*[@id="UC1G08_F10"]'))  # 倒数第二行选no
+        click(S('//*[@id="UC1G08_F11"]'))  # 倒数第一行选no
+        click(S('//*[@id="UC1G08_F12"]'))  # 倒数第一行选no
+        click(S('//*[@id="UC1G08_F13"]'))  # 倒数第一行选no
+        click(S('//*[@id="UC1G08_F14"]'))  # 倒数第一行选no
+        click(S('//input[@value="Continue"]'))  # 点击提交
 
     def login(self,u,p):
         self.name = u.strip('\n')

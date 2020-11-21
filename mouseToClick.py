@@ -7,6 +7,7 @@ from PIL import ImageGrab
 import win32api, win32con
 from  time import sleep
 import os
+import win32clipboard as w
 
 """
 需要安装的库
@@ -101,5 +102,14 @@ class MouseToClick(object):
         win32api.keybd_event(int(keyboard[keytwo]), 0, 0, 0)
         win32api.keybd_event(int(keyboard[keytwo]), 0, win32con.KEYEVENTF_KEYUP, 0)
         win32api.keybd_event(int(keyboard[keyone]), 0, win32con.KEYEVENTF_KEYUP, 0)
+    # 输入字符串
+    @classmethod
+    def setText(cls,info):
+        w.OpenClipboard()
+        w.EmptyClipboard()
+        w.SetClipboardData(win32con.CF_UNICODETEXT, info)  # 设置剪切板内容
+        w.CloseClipboard()  # 关闭剪贴板
+        sleep(0.3)
+        MouseToClick.twoKey('CTRL', 'V')  # 输入密码
 if __name__ == '__main__':
     MouseToClick.click_img('./img/email_setting.png')  # 点击邮箱设置

@@ -28,6 +28,6 @@ email_dict = get_email_dict(email_filename)  # 邮箱
 email_pwd = email_dict.get('邮箱密码')
 
 
-str1 = 'gnrxl8QmhNgQ'
-for i in str1:
-    MouseToClick.oneKey(i)
+str1 = ['January','February','March','April','May','June','July','August','September']
+import random
+print(random.choice(str1))

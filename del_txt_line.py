@@ -24,5 +24,4 @@ def del_line(name,filename):
 
 
 if __name__ == '__main__':
-    # del_line('117.57.62.236','ip.txt')\
-    print(get_ip())
+    del_line('969519120','./template/个人信息.txt')

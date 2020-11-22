@@ -1,21 +1,14 @@
 #coding=utf-8
 
 from helium import *
-from itertools import zip_longest
 from kill_prot import *
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from locale import atof,setlocale,LC_NUMERIC
 from email_oper import *
 from get_template import *
-from send_request import SendRequest
 from selenium.webdriver.support.ui import Select
-from yanzhengqi_oper import get_make_code
-from base64_to_img import to_png
-from chick_proxy import servers_chick_ip
 from del_txt_line import del_line#用一行删除一行
-from url_2_png import get_src_img
-from email_oper import get_url
 from xpath_to_png import GetPng
 from chaojiying_Python.chaojiying import get_coordinate
 from selenium.webdriver import ActionChains #动作操作
@@ -42,31 +35,6 @@ chrome_path = config.get('userinfo', "chrome_path")  # 0-12 如果是0 就表示
 yanzhengqi_path = config.get('userinfo', "yanzhengqi_path")  # 0-12 如果是0 就表示不指定月份
 email_exe_path = config.get('userinfo', "email_exe_path")  # 0-12 如果是0 就表示不指定月份
 
-
-
-def get_login_code(driver):
-    """
-    获取登录验证码
-    :return:
-    """
-    while 1:
-        set_driver(driver)
-        print('识别中...')
-        scr = S('//*[@id="auth-captcha-image"]').web_element.get_attribute('src')
-        get_src_img(scr, './img/login_code8.png')
-        sleep(0.3)
-        code = png_2_text('./img/login_code8.png')
-        if code:
-            code = code.strip().replace(' ', '')
-        else:
-            code = ''
-        if len(code) == 6:
-            return code
-        else:
-            click(S('//*[@id="auth-captcha-refresh-link"]'))  # 点击换一张
-            wait_until(S('//*[@id="auth-captcha-refresh-link" and @style="display: inline;"]').exists,
-                       timeout_secs=20, interval_secs=0.4)  ## 等待图片加载成功
-            return get_login_code(driver)
 
 class BaseStartChome():
     """
@@ -122,7 +90,7 @@ class BaseStartChome():
         检查验证码是否正常通过
         :return:
         """
-        for i in range(200):
+        for i in range(400):
             if i == 0:
                 sleep(2.5)
             sleep(1)
@@ -130,8 +98,6 @@ class BaseStartChome():
             if img_exist:#ok图片存在表示成功
                 print('验证码通过')
                 return
-            else:
-                print('循环检测验证码是否验证成功...')
             if i == 99:
                 print('超时，程序退出')
                 sys.exit()
@@ -141,6 +107,7 @@ class BaseStartChome():
         第一二张：注册
         :return:
         """
+        print('开始图片第1,2张流程')
         self.firse_name = self.personal_information_dict.get('First 名字')
         self.last_name = self.personal_information_dict.get('last 姓')
         self.email = self.email_dict.get('邮箱地址')
@@ -150,7 +117,7 @@ class BaseStartChome():
         write(self.email, into=S('//*[@id="userEmail"]'))  # E-mail Address
         write(self.email, into=S('//*[@id="userEmailConfirm"]'))  # Confirm E-mail Address
         click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe')) #点击弹出验证码
-        print('请输出验证码')
+        print('请输出验证码,450秒后超时')
         self.chick_yanzhengma()#开始检查验证码是否通过
         # click(Link('Contact Us'))  # 打开一个新的标签页面
         # switch_to(find_all(Window())[0])  # 切换到第0个窗口
@@ -165,7 +132,7 @@ class BaseStartChome():
         第三四张：激活邮箱
         :return:
         """
-        print('开始激活邮箱')
+        print('开始图片第3,4张流程，激活邮箱')
         self.email_pwd = self.email_dict.get('邮箱密码')
         #switch_to(find_all(Window())[1])  # 打开第0个窗口
         self.driver.get("https://login.yahoo.com/")
@@ -207,6 +174,7 @@ class BaseStartChome():
         第五张图，激活邮件种输入详细信息
         :return:
         """
+        print('开始图片第5张流程，激活邮件输入详细信息')
         try:
             write(self.firse_name, into=S('//*[@id="userNameFirst"]'))  # firse name
             write(self.last_name, into=S('//*[@id="userNameLast"]'))  # last name
@@ -256,6 +224,7 @@ class BaseStartChome():
         图片6,7 填写生日 SSN ， 和确认提交
         :return:
         """
+        print('开始图片第6,7张流程，填写生日 SSN信息等')
         birth_date = self.personal_information_dict.get('生日')#1985/5/19
         birth_date = birth_date.split('/')
         if len(birth_date[1]) == 1:
@@ -274,13 +243,14 @@ class BaseStartChome():
         图片9，10
         :return:
         """
+        print('开始图片第9,10张流程')
         self.driver.get('https://www.labor.ny.gov/signin')
         click(S('//*[@id="signInButton"]'))  # 点击 sign in
         try:
             write(self.username, into=S('//*[@id="loginform:username"]'))  # 用户名
             write(self.pwd, into=S('//*[@id="loginform:password"]'))  # 密码
         except:
-            print('已被登录，开始退出登录')
+            print('已被登录，开始退出登录后重新登录')
             click(S('//*[@id="CommonNavSignoutLinktxt2"]'))  # 需要退出登录
             try:
                 wait_until(S('//*[@id="CommonNavSignoutLinktxt2"]').exists, timeout_secs=10,
@@ -298,7 +268,7 @@ class BaseStartChome():
             print('开始输入用户名密码')
             write(self.username, into=S('//*[@id="loginform:username"]'))  # 用户名
             write(self.pwd, into=S('//*[@id="loginform:password"]'))  # 密码
-        print("请手动输入验证码")
+        print("请手动输入验证码,400秒后超时")
         self.chick_yanzhengma()
         click(S('//*[@id="loginform:signinButton"]'))  # 点击登录
     def liucheng6(self):
@@ -306,6 +276,7 @@ class BaseStartChome():
         图片11，12
         :return:
         """
+        print('开始图片第10,11张流程')
         wait_until(Link('Unemployment Services').exists, timeout_secs=40, interval_secs=0.4)
         click(Link('Unemployment Services'))  # 点击Unemployment Services
         write(self.personal_information_dict.get('SSN'), into=S('//*[@id="form:uiClaimant_ssn1to9"]'))
@@ -316,6 +287,7 @@ class BaseStartChome():
         图片13
         :return:
         """
+        print('开始图片第13张流程')
         PIN = get_ranrom_pin(4)
         print("生成随机PIN:", PIN)
         write(PIN, into=S('//*[@id="form:uiClaimant_pin_new"]'))
@@ -327,7 +299,7 @@ class BaseStartChome():
         write(mother_name, into=S('//*[@id="form:uiClaimant_maidenNameConf"]'))
         self.save_txt("Mother's Maiden Name:{}".format(mother_name))
         click(S('//*[@id="form:submitNewPinMmn"]'))  # 点击提交
-        print('请手动识别验证码')
+        print('请手动识别验证码，400秒后超时')
 
 
     def liucheng8(self):
@@ -335,8 +307,10 @@ class BaseStartChome():
         图片14，15，16
         :return:
         """
+        print('开始图片第14,15,16张流程')
         try:
             wait_until(Text('File A Claim').exists, timeout_secs=400, interval_secs=0.4)
+            print('识别成功')
             click(S('//*[@id="content"]/form[1]/input[5]')) #点击File A Claim
         except:
             print('或许图片识别超时')
@@ -348,6 +322,7 @@ class BaseStartChome():
         图片17
         :return:
         """
+        print('开始图片第17张流程')
         Select(S('//*[@id="UC1G01_F05"]').web_element).select_by_visible_text('0')
         click(S('//*[@id="UC1G01_F06"]'))  # 第二行单选选 no
         write('2020', into=S('//*[@id="UC1G01_F07_Year"]'))
@@ -365,8 +340,9 @@ class BaseStartChome():
         图片18
         :return:
         """
-        print('开始图片18操作')
+        print('开始图片18流程')
         write(self.personal_information_dict.get('驾照号'), into=S('//*[@id="UC1G04_F08"]'))
+        self.save_txt("驾照号:{}".format(self.personal_information_dict.get('驾照号')))
         Select(S('//*[@id="UC1G04_F09"]').web_element).select_by_visible_text('One employer')
         click(S('//input[@value="Continue"]'))  # 点击提交
 
@@ -375,8 +351,7 @@ class BaseStartChome():
         图片19
         :return:
         """
-        print('开始图片19操作')
-        url = "https://uihp2.labor.ny.gov/UBOC/uiGateway"
+        print('开始图片19流程')
         click(S('//*[@id="UC1G07_F011"]'))  # 第1行单选选 yes
         click(S('//*[@id="UC1G07_F02"]'))  # 第3行单选选 no
         click(S('//*[@id="UC1G07_F03"]'))  # 第6行单选选 no
@@ -387,9 +362,10 @@ class BaseStartChome():
 
     def liucheng12(self):
         """
-        图片19
+        图片20,21
         :return:
         """
+        print('开始图片第20,21张流程')
         click(S('//*[@id="UC1G08_F071"]'))  # 第1行单选选 yes
         click(S('//*[@id="UC1G08_F08"]'))  # 第3行单选选 no
         click(S('//*[@id="UC1G08_F08_B0"]'))  # 第6行单选选 no
@@ -401,55 +377,94 @@ class BaseStartChome():
         click(S('//*[@id="UC1G08_F14"]'))  # 倒数第一行选no
         click(S('//input[@value="Continue"]'))  # 点击提交
 
-    def login(self,u,p):
-        self.name = u.strip('\n')
-        self.pwd = p.strip('\n')
-        print('开始执行账号{}注册'.format(u))
-        self.driver.get(
-            'https://sellercentral.amazon.co.uk/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fsellercentral.amazon.co.uk%2Fhome&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=sc_uk_amazon_v2&openid.mode=checkid_setup&language=zh_CN&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&pageId=sc_uk_amazon_v2&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&ssoResponse=eyJ6aXAiOiJERUYiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiQTI1NktXIn0.a5mUI1lQr80X3ikb1RfOscCl9fzyVVqmwXRr7HiL8LvGu6_LPzJA3w.T45gQk4uPvjQ7NW0.Na-asGEBLFxeUQFlqMQgwJNXHMC74exdYEpDoxF-LZ9sURBQONC_tTvjCK5Rsr781XOY-SMbZMSmm3q4UhtKJKJVN3tYK-vsOlfm01WkIwsztXXVAtPK50U3GNL1TdWt83BC2gUPzCVvkSVunLWRqUtS3yqesp5rCOyBl4SKfhHTQs2581J8-15xVwQ7LiN1vVYU_tMMJWMimFq2SITB6lvXS9cm8Hs8Rv81scAwDMJUtyHMddsgLnOSZ3wRbY_YmVcS.IwaDHOGL2wtpgIvB_we95A')
-        self.login_out()
-        write(u, into=S('//*[@id="ap_email"]'))
-        write(p, into=S('//*[@id="ap_password"]'))
-        click(S('//*[@id="signInSubmit"]'))
+    def liucheng13(self):
+        """
+        图片22
+        :return:
+        """
+        print('开始图片第22张流程')
         try:
-            wait_until(Link("看不清, 换一张").exists, timeout_secs=8, interval_secs=0.4)  # 需要安全验证
-            print('需要安全验证，开始安全验证')
-            def chick_code(self):
-                try:
-                    wait_until(Link("看不清, 换一张").exists, timeout_secs=8, interval_secs=0.4)  # 有验证码
-                    try:
-                        wait_until(Text('我们找不到具有该电子邮件地址的账户').exists, timeout_secs=1, interval_secs=0.4)
-                        print('找不到具有该电子邮件地址的账户')
-                        return False
-                    except:
-                        pass
-                    print('开始识别验证码')
-                    code = get_login_code(self.driver)
-                    print("验证码是：",code)
-                    print('开始输入验证码')
-                    write(p, into=S('//*[@id="ap_password"]'))
-                    write(code, into=S('//*[@id="auth-captcha-guess"]'))
-                    click(S('//*[@id="signInSubmit"]'))
-                    return chick_code(self)
-                except Exception as e:
-                    print(e)
-                    return True
-            chick_state = chick_code(self)#验证码登录状态
-            if not chick_state:#找不到具有该电子邮件地址的账户的情况
-                return False
-            try:
-                wait_until(S('//*[@id="channelDetails"]').exists, timeout_secs=10, interval_secs=0.4)  ## 是否有批准按钮
-                return True
-            except:
-                return False
-        except Exception as e:
-            print(e)
-            try:
-                wait_until(S('//*[@id="channelDetails"]').exists, timeout_secs=3, interval_secs=0.4)  ## 是否有批准按钮
-                return True
-            except:
-                return False
+            wait_until(Text('Federal Employer Identification Number (FEIN)').exists, timeout_secs=5, interval_secs=0.4)
+            click(S('//input[@value="Continue"]'))  # 点击提交
+        except:
+            print('请手动操作到流程第6步')
+        wait_until(S('//*[@id="UC1G10_F01"]').exists, timeout_secs=1000, interval_secs=0.4)
+        write(self.personal_information_dict.get('公司名字'), into=S('//*[@id="UC1G10_F01"]'))  # 公司名字
+        write(self.personal_information_dict.get('公司地址'), into=S('//*[@id="UC1G10_F02"]'))  # 公地址
+        write(self.personal_information_dict.get('公司市'), into=S('//*[@id="UC1G10_F04"]'))  # 公地市
+        write(self.phone_dict.get('电话')[0:3], into=S('//*[@id="UC1G10_F08P1"]'))
+        write(self.phone_dict.get('电话')[3:6], into=S('//*[@id="UC1G10_F08P2"]'))
+        write(self.phone_dict.get('电话')[6:], into=S('//*[@id="UC1G10_F08P3"]'))
+        write(self.personal_information_dict.get('公司邮编'), into=S('//*[@id="UC1G10_F06"]'))
+        click(S('//*[@id="UC1G10_F13L"]'))  # 倒数第一行选no
+        write('2018', into=S('//*[@id="UC1G10_F09_Year"]'))
+        Select(S('//*[@id="UC1G10_F09_Day"]').web_element).select_by_visible_text('3')
+        Select(S('//*[@id="UC1G10_F09_Month"]').web_element).select_by_visible_text('February')
+        Select(S('//*[@id="UC1G10_F05"]').web_element).select_by_visible_text('New York')
 
+        write('customer service', into=S('//*[@id="UC1G10_F17"]'))  # What wUC1G10_F01as your job title?
+        write('office', into=S('//*[@id="UC1G10_F19"]'))  # What was your job location or job site?
+        Select(S('//*[@id="UC1G10_F18"]').web_element).select_by_visible_text('Business and Financial')
+        click(S('//input[@value="Continue"]'))  # 点击提交
+        self.save_txt("公司名字:{}".format(self.personal_information_dict.get('公司名字')))
+        self.save_txt("公司地址:{}".format(self.personal_information_dict.get('公司地址')))
+        self.save_txt("公司市:{}".format(self.personal_information_dict.get('公司市')))
+        self.save_txt("个人电话:{}".format(self.phone_dict.get('电话')))
+        self.save_txt("公司邮编:{}".format(self.personal_information_dict.get('公司邮编')))
+    def liucheng14(self):
+        """
+        图片23
+        :return:
+        """
+        print('开始图片23张流程')
+        click(S('//*[@id="UC1G10_UC10_F01"]'))  # 第1行单选选 yes
+        click(S('//td[@colspan="3"]//input[@value="Continue"]'))  # 点击提交
+
+    def liucheng15(self):
+        """
+        图片24
+        :return:
+        """
+        print('开始图片第24张流程')
+        click(S('//*[@id="UC1G05_F15"]'))  # 第1行单选选 no
+        write(self.personal_information_dict.get('公司地址'), into=S('//*[@id="UC1G05_F03"]'))
+        write(self.personal_information_dict.get('公司市'), into=S('//*[@id="UC1G05_F05"]'))
+        Select(S('//*[@id="UC1G05_F06"]').web_element).select_by_visible_text('New York')
+        Select(S('//*[@id="UC1G05_F38"]').web_element).select_by_visible_text('Four-year degree program')
+        write(self.personal_information_dict.get('公司邮编'), into=S('//*[@id="UC1G05_F07"]'))
+        write(self.personal_information_dict.get('公司电话')[0:3], into=S('//*[@id="UC1G05_F34P1"]'))
+        write(self.personal_information_dict.get('公司电话')[3:6], into=S('//*[@id="UC1G05_F34P2"]'))
+        write(self.personal_information_dict.get('公司电话')[6:], into=S('//*[@id="UC1G05_F34P3"]'))
+        click(S('//*[@id="<%= IUC1G05_UIKeys.UI_UC1G05_Gender%>0"]'))  # Male
+        click(S('//*[@id="UC1G05_F40"]'))  # Are you a veteran?
+        click(S('//*[@id="UC1G05_F411"]'))  # Are you a citizen of the U.S?
+        click(S('//*[@id="UC1G05_F42"]'))  #
+        click(S('//*[@id="UC1G05_F44"]'))  #
+        click(S('//*[@id="UC1G05_F43"]'))  #
+        click(S('//*[@id="UC1G05_F45"]'))  #
+        Select(S('//*[@id="UC1G05_F36"]').web_element).select_by_visible_text('Do not wish to answer')
+        Select(S('//*[@id="UC1G05_F37"]').web_element).select_by_visible_text('Do not wish to answer')
+        Select(S('//*[@id="UC1G05_F39"]').web_element).select_by_visible_text('No')
+        Select(S('//*[@id="UC1G05_F210"]').web_element).select_by_visible_text('English')
+        click(S('//input[@value="Continue"]'))  # 点击提交
+        self.save_txt("公司电话:{}".format(self.personal_information_dict.get('公司电话')))
+    def liucheng16(self):
+        """
+        图片25,
+        :return:
+        """
+        print('开始图片第25张流程')
+        click(S('//form[@name="addrNormForm"]/input[@value="Use this address"]'))
+        Select(S('//*[@id="DirectDeposit_PaymentOption"]').web_element).select_by_visible_text('Direct Deposit')
+        click(S('//input[@value="Continue"]'))  # 点击提交
+        print('流程完成，开始清理已使用的信息')
+        del_line(self.personal_information_dict.get('驾照号'), self.personal_information_filename)#删除个人信息
+        print('删除使用过的个人信息完成')
+        del_line(self.email_dict.get('邮箱地址'), self.email_filename)#删除个人邮箱
+        print('删除使用过的个人邮箱完成')
+        del_line(self.phone_dict.get('电话'), self.phone_filename)#删除个人电话
+        print('删除使用过的个人电话完成')
+        print('剩余流程请手动完成，完成后重启软件')
     def check_img_exist(self,img_name):
         """
         检测当前页面是否有 图片 存在
@@ -508,6 +523,18 @@ def setup(B):
     B.liucheng2()
     B.liucheng3()
     B.liucheng4()
+    B.liucheng5()
+    B.liucheng6()
+    B.liucheng7()
+    B.liucheng8()
+    B.liucheng9()
+    B.liucheng10()
+    B.liucheng11()
+    B.liucheng12()
+    B.liucheng13()
+    B.liucheng14()
+    B.liucheng15()
+    B.liucheng16()
 
 
 if __name__ == '__main__':

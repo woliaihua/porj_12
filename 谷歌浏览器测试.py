@@ -144,8 +144,6 @@ def chick_yanzhengma():
         if img_exist:  # ok图片存在表示成功
             print('验证码通过')
             return
-        else:
-            print('循环检测验证码是否验证成功...')
         if i == 99:
             print('超时，程序退出')
             sys.exit()
@@ -224,8 +222,13 @@ def liucheng6():
     """
     wait_until(Link('Unemployment Services').exists, timeout_secs=40, interval_secs=0.4)
     click(Link('Unemployment Services'))  # 点击Unemployment Services
-    write(personal_information_dict.get('SSN'), into=S('//*[@id="form:uiClaimant_ssn1to9"]'))
-    write(personal_information_dict.get('SSN'), into=S('//*[@id="form:uiClaimant_confirmSsn1to9"]'))
+    try:
+        write(personal_information_dict.get('SSN'), into=S('//*[@id="form:uiClaimant_ssn1to9"]'))
+        write(personal_information_dict.get('SSN'), into=S('//*[@id="form:uiClaimant_confirmSsn1to9"]'))
+    except:
+        click(Link('Unemployment Services'))  # 点击Unemployment Services
+        write(personal_information_dict.get('SSN'), into=S('//*[@id="form:uiClaimant_ssn1to9"]'))
+        write(personal_information_dict.get('SSN'), into=S('//*[@id="form:uiClaimant_confirmSsn1to9"]'))
     click(S('//*[@id="form:submitClaimantInfo"]'))#点击提交
 def liucheng7():
     """
@@ -296,7 +299,7 @@ def liucheng11():
 
 def liucheng12():
     """
-    图片19
+    图片20
     :return:
     """
     click(S('//*[@id="UC1G08_F071"]'))  # 第1行单选选 yes
@@ -310,18 +313,107 @@ def liucheng12():
     click(S('//*[@id="UC1G08_F14"]'))  # 倒数第一行选no
     click(S('//input[@value="Continue"]'))  # 点击提交
 
+
 def liucheng13():
     """
-    图片19
+    图片22
     :return:
     """
-liucheng5()
-liucheng6()
-liucheng7()
-liucheng8()
-liucheng9()
-liucheng10()
-liucheng11()
-liucheng12()
+    try:
+        wait_until(Text('Federal Employer Identification Number (FEIN)').exists, timeout_secs=5, interval_secs=0.4)
+        click(S('//input[@value="Continue"]'))  # 点击提交
+    except:
+        print('请手动操作到流程6')
+    wait_until(S('//*[@id="UC1G10_F01"]').exists, timeout_secs=1000, interval_secs=0.4)
+    write(personal_information_dict.get('公司名字'), into=S('//*[@id="UC1G10_F01"]'))  # 公司名字
+    write(personal_information_dict.get('公司地址'), into=S('//*[@id="UC1G10_F02"]'))  # 公地址
+    write(personal_information_dict.get('公司市'), into=S('//*[@id="UC1G10_F04"]'))  # 公地市
+    write(phone_dict.get('电话')[0:3], into=S('//*[@id="UC1G10_F08P1"]'))
+    write(phone_dict.get('电话')[3:6], into=S('//*[@id="UC1G10_F08P2"]'))
+    write(phone_dict.get('电话')[6:], into=S('//*[@id="UC1G10_F08P3"]'))
+    write(personal_information_dict.get('公司邮编'), into=S('//*[@id="UC1G10_F06"]'))
+    click(S('//*[@id="UC1G10_F13L"]'))  # 倒数第一行选no
+    write('2018', into=S('//*[@id="UC1G10_F09_Year"]'))
+    Select(S('//*[@id="UC1G10_F09_Day"]').web_element).select_by_visible_text('3')
+    Select(S('//*[@id="UC1G10_F09_Month"]').web_element).select_by_visible_text('February')
+    Select(S('//*[@id="UC1G10_F05"]').web_element).select_by_visible_text('New York')
 
+    write('customer service', into=S('//*[@id="UC1G10_F17"]'))  # What wUC1G10_F01as your job title?
+    write('office', into=S('//*[@id="UC1G10_F19"]'))  # What was your job location or job site?
+    Select(S('//*[@id="UC1G10_F18"]').web_element).select_by_visible_text('Business and Financial')
+    click(S('//input[@value="Continue"]'))  # 点击提交
+    save_txt("公司名字:{}".format(personal_information_dict.get('公司名字')))
+    save_txt("公司地址:{}".format(personal_information_dict.get('公司地址')))
+    save_txt("公司市:{}".format(personal_information_dict.get('公司市')))
+    save_txt("个人电话:{}".format(phone_dict.get('电话')))
+    save_txt("公司邮编:{}".format(personal_information_dict.get('公司邮编')))
+
+
+def liucheng14():
+    """
+    图片23
+    :return:
+    """
+    click(S('//*[@id="UC1G10_UC10_F01"]'))  # 第1行单选选 yes
+    click(S('//td[@colspan="3"]//input[@value="Continue"]'))  # 点击提交
+
+
+def liucheng15():
+    """
+    图片24
+    :return:
+    """
+    click(S('//*[@id="UC1G05_F15"]'))  # 第1行单选选 no
+    write(personal_information_dict.get('公司地址'), into=S('//*[@id="UC1G05_F03"]'))
+    write(personal_information_dict.get('公司市'), into=S('//*[@id="UC1G05_F05"]'))
+    Select(S('//*[@id="UC1G05_F06"]').web_element).select_by_visible_text('New York')
+    Select(S('//*[@id="UC1G05_F38"]').web_element).select_by_visible_text('Four-year degree program')
+    write(personal_information_dict.get('公司邮编'), into=S('//*[@id="UC1G05_F07"]'))
+    write(personal_information_dict.get('公司电话')[0:3], into=S('//*[@id="UC1G05_F34P1"]'))
+    write(personal_information_dict.get('公司电话')[3:6], into=S('//*[@id="UC1G05_F34P2"]'))
+    write(personal_information_dict.get('公司电话')[6:], into=S('//*[@id="UC1G05_F34P3"]'))
+    click(S('//*[@id="<%= IUC1G05_UIKeys.UI_UC1G05_Gender%>0"]'))  # Male
+    click(S('//*[@id="UC1G05_F40"]'))  # Are you a veteran?
+    click(S('//*[@id="UC1G05_F411"]'))  # Are you a citizen of the U.S?
+    click(S('//*[@id="UC1G05_F42"]'))  #
+    click(S('//*[@id="UC1G05_F44"]'))  #
+    click(S('//*[@id="UC1G05_F43"]'))  #
+    click(S('//*[@id="UC1G05_F45"]'))  #
+    Select(S('//*[@id="UC1G05_F36"]').web_element).select_by_visible_text('Do not wish to answer')
+    Select(S('//*[@id="UC1G05_F37"]').web_element).select_by_visible_text('Do not wish to answer')
+    Select(S('//*[@id="UC1G05_F39"]').web_element).select_by_visible_text('No')
+    Select(S('//*[@id="UC1G05_F210"]').web_element).select_by_visible_text('English')
+    click(S('//input[@value="Continue"]'))  # 点击提交
+    save_txt("公司电话:{}".format(personal_information_dict.get('公司电话')))
+
+
+def liucheng16():
+    """
+    图片25,
+    :return:
+    """
+    click(S('//form[@name="addrNormForm"]/input[@value="Use this address"]'))
+    Select(S('//*[@id="DirectDeposit_PaymentOption"]').web_element).select_by_visible_text('Direct Deposit')
+    click(S('//input[@value="Continue"]'))  # 点击提交
+    print('流程完成，开始清理已使用的信息')
+    del_line(personal_information_dict.get('驾照号'), personal_information_filename)  # 删除个人信息
+    print('删除使用过的个人信息完成')
+    del_line(email_dict.get('邮箱地址'), email_filename)  # 删除个人邮箱
+    print('删除使用过的个人邮箱完成')
+    del_line(phone_dict.get('电话'), phone_filename)  # 删除个人电话
+    print('删除使用过的个人电话完成')
+# liucheng5()
+# liucheng6()
+# liucheng7()
+# liucheng8()
+# liucheng9()
+# liucheng10()
+# liucheng11()
+# liucheng12()
+liucheng13()
+liucheng14()
+liucheng15()
+liucheng16()
+
+#wait_until(Text('Federal Employer Identification Number (FEIN)').exists, timeout_secs=400, interval_secs=0.4)
 #wait_until(S('//*[@id="CommonNavSignoutLinktxt2"]').exists, timeout_secs=2, interval_secs=0.4)  # 需要退出登录

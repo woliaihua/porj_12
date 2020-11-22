@@ -627,7 +627,7 @@ def liucheng16():
     print('删除使用过的个人电话完成')
     print('剩余流程请手动完成，完成后重启软件')
     write('123', into=S('//*[@id="DirectDeposit_MothersMaidenName"]'))
-click(S('//*[@title="Individual Account Creation for Online Services"]'))  # 点击第一封邮件
+wait_until(Text('Your NY GOV Username is:').exists, timeout_secs=5, interval_secs=0.4)
 # liucheng1()
 # liucheng2()
 # liucheng3()

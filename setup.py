@@ -257,11 +257,11 @@ class BaseStartChome():
         str2 = birth_date[1] + '/'+ birth_date[2] + '/' + birth_date[0]
         write(str2, into=S('//*[@id="formRegister:dob"]'))#生日
         self.save_txt('生日：{}'.format(str2))
-        SSN = self.personal_information_dict.get('SSN')  # 1985/5/19
+        SSN = self.personal_information_dict.get('SSN')
         write(SSN, into=S('//*[@id="formRegister:UIClaimant_social"]'))#SSN
         self.save_txt('SSN：{}'.format(SSN))
-        click(S('//*[@id="formRegister:buttondoAddReg"]')) #确认
-        try:
+        click(S('//*[@id="formRegister:buttondoAddReg"]')) #继续
+        try:#监测是否被注册
             wait_until(Text('The SSN you provided is already in our records').exists, timeout_secs=5, interval_secs=0.4)
             print('SSN已被注册，跳过此行数据，从头开始注册')
             self.save_txt('SSN已经被注册，停止流程')
@@ -271,6 +271,21 @@ class BaseStartChome():
             self.zhuce()
         except:
             pass
+        click(S('//*[@id="formRegister:buttondoReg"]'))  # 图片7点击确认
+        try:#监测是否有系统 问题
+            wait_until(Text('There was a problem with the system. Please try again later.').exists, timeout_secs=5,
+                       interval_secs=0.4)
+            print('系统出现问题。刷新页面重试。')
+            self.driver.refresh()
+            click(S('//*[@id="formRegister:buttondoReg"]'))  # 图片7点击确认
+        except:
+            pass
+        #图 片8  出现这个表示注册成功
+        try:
+            wait_until(Text('Your NY GOV Username is:').exists, timeout_secs=15, interval_secs=0.4)
+            print('注册流程完成')
+        except:
+            print('没有注册成功')
     def liucheng5(self):
         """
         图片9，10,11
@@ -590,4 +605,5 @@ def setup(B):
 
 if __name__ == '__main__':
     B = BaseStartChome(9022)
-    setup(B)
+    # setup(B)
+    setup_zhuce(B)

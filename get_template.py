@@ -36,6 +36,9 @@ def get_temp_dict(filename):
             else:
                 try:
                     l = line.split('----')
+                    if len(l) != 13:
+                        print(filename + "第{}行格式不对，跳过此行".format(index + 1))
+                        continue
                     dict1['First 名字'] = l[0].strip().strip('\n')
                     dict1['last 姓'] = l[1].strip().strip('\n')
                     dict1['个人地址'] = l[2].strip().strip('\n')
@@ -52,7 +55,10 @@ def get_temp_dict(filename):
                     break
                 except:
                     print(filename+"第{}行格式不对，跳过此行".format(index+1))
-    return dict1
+    if dict1:
+        return dict1
+    else:
+        print(filename+'所有数据格式都不正确，无法取到正确的数据，请检查')
 def get_phone_dict(filename):
     """
     获取个人信息文本信息
@@ -96,7 +102,7 @@ def get_email_dict(filename):
                 print(filename+"第{}行格式不对，跳过此行".format(index+1))
     return dict1
 if __name__ == '__main__':
-    filename = get_filename('.txt', '个人邮箱')
-    print(get_email_dict(filename))
+    filename = get_filename('.txt', '个人信息')
+    print(get_temp_dict(filename))
     # print(get_filename('.txt','template'))
     # os.remove(filename)

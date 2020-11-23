@@ -132,9 +132,29 @@ class BaseStartChome():
         click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe')) #点击弹出验证码
         print('请输出验证码,450秒后超时')
         self.chick_yanzhengma()#开始检查验证码是否通过
-        # click(Link('Contact Us'))  # 打开一个新的标签页面
-        # switch_to(find_all(Window())[0])  # 切换到第0个窗口
         click(S('//*[@id="buttondoAddReg"]'))  # 点击continue
+
+        # 监测邮箱 是不是被注册过了
+        def chick_email(self):
+            print('开始检测邮箱是否被注册过，最长6秒没有出现提示，邮箱没问题')
+            try:  # 表示邮箱已被注册
+                wait_until(Text('This e-mail address was already used for a NY.GOV account').exists, timeout_secs=6,
+                           interval_secs=0.4)
+                print('此邮箱已被注册 ，自动调整下一个邮箱')
+                del_line(self.email,self.email_filename)#删除已被注册过的邮箱
+                self.information_init()#重新初始化
+                self.email = self.email_dict.get('邮箱地址')#重新获取邮箱地址
+                write(self.email, into=S('//*[@id="userEmail"]'))  # E-mail Address
+                write(self.email, into=S('//*[@id="userEmailConfirm"]'))  # Confirm E-mail Address
+                click(S('//div[contains(@id,"j_id_jsp_")]/div/div/iframe'))  # 点击弹出验证码
+                print('请输出验证码,450秒后超时')
+                self.chick_yanzhengma()  # 开始检查验证码是否通过
+                click(S('//*[@id="buttondoAddReg"]'))  # 点击continue
+                chick_email(self)
+            except:
+                pass
+        chick_email(self)
+        print('注册成功，开始保存信息 ')
         self.save_txt('firse name: {}'.format(self.firse_name))
         self.save_txt('last_name: {}'.format(self.last_name))
         self.save_txt('email: {}'.format(self.email))
@@ -282,8 +302,9 @@ class BaseStartChome():
             pass
         #图 片8  出现这个表示注册成功
         try:
+            print('开始判断页面是否有Your NY GOV Username is字样，最多等待15秒钟')
             wait_until(Text('Your NY GOV Username is:').exists, timeout_secs=15, interval_secs=0.4)
-            print('注册流程完成')
+            print('检测成功，注册流程完成')
         except:
             print('没有注册成功')
     def liucheng5(self):
@@ -569,7 +590,7 @@ class BaseStartChome():
         :param txt:
         :return:
         """
-        print(txt)
+        # print(txt)
         filename ='./result/'+ self.firse_name+self.last_name+'.txt'
         encod = 'utf-8'
         with open(filename, 'a', encoding=encod) as f:

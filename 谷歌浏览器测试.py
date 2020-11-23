@@ -216,6 +216,7 @@ def liucheng1():
     # click(Link('Contact Us'))  # 打开一个新的标签页面
     # switch_to(find_all(Window())[0])  # 切换到第0个窗口
     click(S('//*[@id="buttondoAddReg"]'))  # 点击continue
+
     save_txt('firse name: {}'.format(firse_name))
     save_txt('last_name: {}'.format(last_name))
     save_txt('email: {}'.format(email))
@@ -627,7 +628,7 @@ def liucheng16():
     print('删除使用过的个人电话完成')
     print('剩余流程请手动完成，完成后重启软件')
     write('123', into=S('//*[@id="DirectDeposit_MothersMaidenName"]'))
-wait_until(Text('Your NY GOV Username is:').exists, timeout_secs=5, interval_secs=0.4)
+wait_until(Text('This e-mail address was already used for a NY.GOV account').exists, timeout_secs=5, interval_secs=0.4)
 # liucheng1()
 # liucheng2()
 # liucheng3()

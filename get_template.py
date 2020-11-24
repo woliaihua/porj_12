@@ -53,8 +53,7 @@ def get_temp_dict(filename):
                     dict1['公司邮编'] = l[11].strip().strip('\n')
                     dict1['公司电话'] = l[12].strip().strip('\n')
                     break
-                except Exception as e:
-                    print(e)
+                except:
                     print(filename+"第{}行格式不对，跳过此行".format(index+1))
     if dict1:
         return dict1

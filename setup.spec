@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['setup.py'],
-             pathex=['F:\\项目19-亚马逊卖家批量注册'],
+             pathex=['F:\\项目20-美国网站注册'],
              binaries=[],
              datas=[],
              hiddenimports=[],

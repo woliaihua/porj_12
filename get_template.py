@@ -1,7 +1,7 @@
 
 import chardet
 import os
-
+from time import sleep
 
 def get_filename(endswith, filename):
     """
@@ -53,12 +53,14 @@ def get_temp_dict(filename):
                     dict1['公司邮编'] = l[11].strip().strip('\n')
                     dict1['公司电话'] = l[12].strip().strip('\n')
                     break
-                except:
+                except Exception as e:
+                    print(e)
                     print(filename+"第{}行格式不对，跳过此行".format(index+1))
     if dict1:
         return dict1
     else:
         print(filename+'所有数据格式都不正确，无法取到正确的数据，请检查')
+        sleep(1000000)
 def get_phone_dict(filename):
     """
     获取个人信息文本信息
